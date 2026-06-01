@@ -222,8 +222,10 @@ class CLPHandler(BaseHTTPRequestHandler):
         # Routes
         if path == '/' or path == '/index.html':
             return self.serve_file('index.html')
-        if path == '/admin' or path == '/admin.html':
-            return self.serve_file('admin.html')
+        if path == '/admin':
+            return self.serve_admin_inline()
+        if path == '/home':
+            return self.serve_home_inline()
         if path.startswith('/jobs/'):
             slug = path.split('/jobs/')[1].strip('/')
             return self.serve_clp(slug)
@@ -295,6 +297,38 @@ class CLPHandler(BaseHTTPRequestHandler):
                 html = html.replace('<!-- INJECT_SLUG -->', inject)
             else:
                 html = html.replace('</head>', inject + '\n</head>')
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(html.encode('utf-8'))
+        except Exception:
+            self.send_response(500)
+
+    def serve_admin_inline(self):
+        # Serve admin.html as inline HTML
+        fp = os.path.join(FRONTEND_DIR, 'admin.html')
+        if not os.path.exists(fp):
+            return self.send_response(404)
+        try:
+            with open(fp, 'r', encoding='utf-8') as f:
+                html = f.read()
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self._set_cors_headers()
+            self.end_headers()
+            self.wfile.write(html.encode('utf-8'))
+        except Exception:
+            self.send_response(500)
+
+    def serve_home_inline(self):
+        # Serve cohorts grid as inline HTML
+        fp = os.path.join(FRONTEND_DIR, 'index.html')
+        if not os.path.exists(fp):
+            return self.send_response(404)
+        try:
+            with open(fp, 'r', encoding='utf-8') as f:
+                html = f.read()
             self.send_response(200)
             self.send_header('Content-Type', 'text/html')
             self._set_cors_headers()
