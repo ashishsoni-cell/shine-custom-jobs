@@ -69,26 +69,32 @@
     if(res.ok){ alert('Created: '+data.url); setTimeout(()=>location.href=data.url,1200); } else { alert('Error: '+(data.error||JSON.stringify(data))); }
   });
 
-  async function fetchCohort(slug){
-    try{
-      const res = await fetch('/api/cohorts/refresh',{
-        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({slug})
-      });
-      const data = await res.json();
-      alert(data.message || 'Fetch started');
-      location.reload();
-    }catch(e){ alert('Fetch error'); console.error(e); }
+  async function fetchCohort(slug) {
+    const res = await fetch('/api/cohorts/refresh', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({slug})
+    });
+    const data = await res.json();
+    alert(data.message || 'Fetch started');
+    location.reload();
   }
 
-  async function stopCohort(slug){
-    try{
-      const res = await fetch('/api/cohorts/stop',{
-        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({slug})
-      });
-      const data = await res.json();
-      alert(data.message || 'Stop requested');
-      location.reload();
-    }catch(e){ alert('Stop error'); console.error(e); }
+  async function stopCohort(slug) {
+    const res = await fetch('/api/cohorts/stop', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({slug})
+    });
+    const data = await res.json();
+    alert(data.message || 'Stopped');
+    location.reload();
+  }
+
+  async function deleteCohort(slug) {
+    if (!confirm('Delete ' + slug + '?')) return;
+    await fetch('/api/cohorts/' + slug, {method: 'DELETE'});
+    location.reload();
   }
 
   async function loadCohorts(){
@@ -112,12 +118,7 @@
     html += '</tbody></table>';
     el.innerHTML = html;
     document.querySelectorAll('.view').forEach(b=>b.addEventListener('click', ()=>{ location.href = '/jobs/'+b.dataset.slug; }));
-    document.querySelectorAll('.del').forEach(b=>b.addEventListener('click', async ()=>{
-      if(!confirm('Delete cohort '+b.dataset.slug+'?')) return; const slug=b.dataset.slug; const r=await fetch('/api/cohorts/'+slug,{method:'DELETE'}); const d=await r.json(); if(r.ok){ loadCohorts(); } else alert('Error: '+(d.error||'unknown'));
-    }));
-    document.querySelectorAll('.del').forEach(b=>b.addEventListener('click', async ()=>{
-      if(!confirm('Delete cohort '+b.dataset.slug+'?')) return; const slug=b.dataset.slug; const r=await fetch('/api/cohorts/'+slug,{method:'DELETE'}); const d=await r.json(); if(r.ok){ loadCohorts(); } else alert('Error: '+(d.error||'unknown'));
-    }));
+    document.querySelectorAll('.del').forEach(b=>b.addEventListener('click', ()=>deleteCohort(b.dataset.slug)));
   }
 
   loadCohorts();
