@@ -134,13 +134,38 @@
     fetch('/api/jobs?cohort='+encodeURIComponent(slug)).then(r=>r.json()).then(data=>{
       const jobs = data.jobs || [];
       jobsData = jobs;
-      renderJobs(jobs);
-      if(data.status === 'done'){
+      if(jobs.length > 0){
+        renderJobs(jobs);
+      }
+      const status = (data.status || 'pending').toLowerCase();
+      if(status === 'done'){
         clearInterval(polling);
         loading.style.display='none';
+      } else if(status === 'fetching'){
+        loading.style.display='block';
+        document.getElementById('loadingText').textContent = jobs.length > 0 ? 'Updating latest roles...' : 'Fetching latest ' + slug + '...';
+      } else if(status === 'paused' || status === 'pending' || status === 'not_started'){
+        clearInterval(polling);
+        if(jobs.length === 0){
+          empty.textContent = 'Jobs coming soon — check back later';
+          empty.style.display='block';
+          loading.style.display='none';
+        }
+      } else if(status === 'error'){
+        clearInterval(polling);
+        if(jobs.length === 0){
+          empty.textContent = 'Unable to load jobs right now';
+          empty.style.display='block';
+        }
+        loading.style.display='none';
       } else {
-        // continue polling until done
-        loading.style.display = 'block';
+        // unknown status, stop polling for safety
+        clearInterval(polling);
+        if(jobs.length === 0){
+          empty.textContent = 'Jobs coming soon — check back later';
+          empty.style.display='block';
+        }
+        loading.style.display='none';
       }
     }).catch(e=>{ console.error(e); document.getElementById('loadingText').textContent='Unable to load jobs'; });
   }
