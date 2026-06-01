@@ -248,7 +248,7 @@ class CLPHandler(BaseHTTPRequestHandler):
             return self.serve_home_inline()
         if path.startswith('/jobs/'):
             slug = path.split('/jobs/')[1].strip('/')
-            return self.serve_clp(slug)
+            return self.serve_clp(slug, qs)
         if path.startswith('/api/'):
             return self.handle_api_get(path, qs)
         # static frontend files
@@ -285,6 +285,9 @@ class CLPHandler(BaseHTTPRequestHandler):
         if path.startswith('/api/cohorts/'):
             slug = path.split('/api/cohorts/')[1]
             return self.handle_delete_cohort(slug)
+        if path.startswith('/api/cache/'):
+            slug = path.split('/api/cache/')[1]
+            return self.handle_clear_cache(slug)
         return self.send_json(404, {'error': 'Not found'})
 
     # --- file serving ---
@@ -310,7 +313,7 @@ class CLPHandler(BaseHTTPRequestHandler):
         except Exception:
             self.send_response(500)
 
-    def serve_clp(self, slug):
+    def serve_clp(self, slug, qs):
         # serve clp.html and inject slug via a small script
         fp = os.path.join(FRONTEND_DIR, 'clp.html')
         if not os.path.exists(fp):
@@ -319,6 +322,42 @@ class CLPHandler(BaseHTTPRequestHandler):
             with open(fp, 'r', encoding='utf-8') as f:
                 html = f.read()
             inject = f"<script>window.COHORT_SLUG=\"{slug}\";</script>"
+            # Check for admin mode
+            is_admin = qs.get('admin', [None])[0] == '1'
+            admin_bar_html = ''
+            if is_admin:
+                status = cohort_status.get(slug, {'status': 'pending', 'count': 0})
+                cache = read_cache(slug)
+                count = cache.get('count') if cache else status.get('count', 0)
+                admin_bar_html = f'''<div id="adminBar" style="background:#111;border-bottom:1px solid #222;padding:10px 24px;display:flex;align-items:center;gap:12px;font-size:14px">
+                  <button id="fetchBtn" onclick="adminFetch('{slug}')" style="background:#22C55E;color:#000;border:none;padding:8px 12px;border-radius:6px;font-weight:700;cursor:pointer">▶ Fetch Jobs</button>
+                  <button id="stopBtn" onclick="adminStop('{slug}')" style="background:#EAB308;color:#000;border:none;padding:8px 12px;border-radius:6px;font-weight:700;cursor:pointer">⏹ Stop</button>
+                  <button id="clearBtn" onclick="adminClear('{slug}')" style="background:#ef4444;color:#fff;border:none;padding:8px 12px;border-radius:6px;font-weight:700;cursor:pointer">🗑 Clear Cache</button>
+                  <div style="margin-left:auto;color:#999">Status: <span id="adminStatus">{status.get('status')}</span> | Jobs: <span id="adminCount">{count}</span></div>
+                </div>
+                <script>
+                async function adminFetch(slug){{
+                  try{{
+                    await fetch('/api/cohorts/refresh',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{slug}})}});
+                    document.getElementById('adminStatus').textContent='fetching';
+                  }}catch(e){{ console.error(e); }}
+                }}
+                async function adminStop(slug){{
+                  try{{
+                    await fetch('/api/cohorts/stop',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{slug}})}});
+                  }}catch(e){{ console.error(e); }}
+                }}
+                async function adminClear(slug){{
+                  try{{
+                    await fetch('/api/cache/'+slug,{{method:'DELETE'}});
+                    document.getElementById('adminCount').textContent='0';
+                  }}catch(e){{ console.error(e); }}
+                }}
+                </script>'''
+                # Insert admin bar after <div class="header">
+                header_close = html.find('</div>    </div>\n\n    <div class="hero')
+                if header_close > 0:
+                    html = html[:header_close + 24] + '\n    ' + admin_bar_html + html[header_close + 24:]
             if '<!-- INJECT_SLUG -->' in html:
                 html = html.replace('<!-- INJECT_SLUG -->', inject)
             else:
@@ -518,6 +557,20 @@ class CLPHandler(BaseHTTPRequestHandler):
                 cohort_status.pop(slug, None)
             cohort_stop_flags.pop(slug, None)
             return self.send_json(200, {'deleted': slug, 'status': 'ok'})
+        except Exception as e:
+            return self.send_json(500, {'error': str(e)})
+
+    def handle_clear_cache(self, slug):
+        if not slug:
+            return self.send_json(400, {'error': 'Missing slug'})
+        try:
+            cp = cache_path(slug)
+            if os.path.exists(cp):
+                os.remove(cp)
+            with cohorts_lock:
+                if slug in cohort_status:
+                    cohort_status[slug] = {'status': 'pending', 'count': 0}
+            return self.send_json(200, {'slug': slug, 'status': 'cache cleared'})
         except Exception as e:
             return self.send_json(500, {'error': str(e)})
 
