@@ -100,6 +100,9 @@ except Exception:
 
 # Background fetch thread
 def fetch_jobs_for_cohort(slug, keyword, limit=JOBS_PER_COHORT):
+    global FETCH_PAUSED
+    print(f"[FETCH START] slug={slug} keyword={keyword}", flush=True)
+    print(f"[SERP KEY] {'set' if SERP_API_KEY else 'MISSING'}", flush=True)
     with cohorts_lock:
         cohort_status[slug] = {'status': 'fetching', 'count': 0}
     jobs = []
@@ -158,6 +161,7 @@ def fetch_jobs_for_cohort(slug, keyword, limit=JOBS_PER_COHORT):
                 search = GoogleSearch(params)
                 results = search.get_dict()
                 jobs_raw = results.get('jobs_results', [])
+                print(f"[SERP CALL] query={query} results={len(jobs_raw)}", flush=True)
                 for jr in jobs_raw:
                     title = jr.get('title')
                     company = jr.get('company_name')
@@ -478,6 +482,15 @@ class CLPHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+# Startup helpers
+
+def auto_start_missing_fetches():
+    for slug, meta in COHORTS.items():
+        if not read_cache(slug):
+            with cohorts_lock:
+                cohort_status[slug] = {'status': 'fetching', 'count': 0}
+            start_fetch_thread(slug, meta['keyword'])
+
 # Run server
 if __name__ == '__main__':
     banner = '\n'.join([
@@ -489,6 +502,7 @@ if __name__ == '__main__':
         '╚══════════════════════════════════════════════╝',
     ])
     print(banner)
+    auto_start_missing_fetches()
     server = ThreadingHTTPServer(('0.0.0.0', PORT), CLPHandler)
     try:
         server.serve_forever()
