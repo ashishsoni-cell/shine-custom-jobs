@@ -58,71 +58,147 @@
   const nameEl = document.getElementById('name');
   const keywordEl = document.getElementById('keyword');
   const preview = document.getElementById('preview');
+  let cohortsCache = {};
+  
   function slugify(text){return (text||'').toLowerCase().replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-');}
   nameEl.addEventListener('input', ()=>{ preview.textContent = '/jobs/' + slugify(nameEl.value); });
 
   document.getElementById('create').addEventListener('click', async ()=>{
     const name = nameEl.value.trim(); const keyword = keywordEl.value.trim();
-    if(!name||!keyword) return alert('Enter name and keyword');
-    const res = await fetch('/api/cohorts/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,keyword})});
-    const data = await res.json();
-    if(res.ok){ alert('Created: '+data.url); setTimeout(()=>location.href=data.url,1200); } else { alert('Error: '+(data.error||JSON.stringify(data))); }
+    if(!name||!keyword) return;
+    const btn = document.getElementById('create');
+    btn.disabled = true; btn.textContent = 'Creating...';
+    try{
+      const res = await fetch('/api/cohorts/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,keyword})});
+      const data = await res.json();
+      if(res.ok){ setTimeout(()=>location.href=data.url,500); } else { btn.disabled=false; btn.textContent='Create + Fetch →'; }
+    }catch(e){
+      btn.disabled=false; btn.textContent='Create + Fetch →';
+    }
   });
 
   async function fetchCohort(slug) {
-    const res = await fetch('/api/cohorts/refresh', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({slug})
-    });
-    const data = await res.json();
-    alert(data.message || 'Fetch started');
-    location.reload();
+    const btn = document.querySelector(`.fetch[data-slug="${slug}"]`);
+    if(!btn) return;
+    btn.disabled = true;
+    btn.textContent = 'Starting...';
+    try{
+      const res = await fetch('/api/cohorts/refresh', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({slug})
+      });
+      const data = await res.json();
+      updateStatusForSlug(slug, 'fetching');
+    }catch(e){
+      btn.disabled = false;
+      btn.textContent = '▶ Fetch';
+    }
   }
 
   async function stopCohort(slug) {
-    const res = await fetch('/api/cohorts/stop', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({slug})
-    });
-    const data = await res.json();
-    alert(data.message || 'Stopped');
-    location.reload();
+    const btn = document.querySelector(`.stop[data-slug="${slug}"]`);
+    if(!btn) return;
+    btn.disabled = true;
+    btn.textContent = 'Stopping...';
+    try{
+      const res = await fetch('/api/cohorts/stop', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({slug})
+      });
+      const data = await res.json();
+    }catch(e){
+      btn.disabled = false;
+      btn.textContent = '⏹ Stop';
+    }
   }
 
   async function deleteCohort(slug) {
     if (!confirm('Delete ' + slug + '?')) return;
-    await fetch('/api/cohorts/' + slug, {method: 'DELETE'});
-    location.reload();
+    try{
+      const res = await fetch('/api/cohorts/' + slug, {method: 'DELETE'});
+      await loadCohorts();
+    }catch(e){}
+  }
+
+  function updateStatusForSlug(slug, newStatus) {
+    const row = document.querySelector(`tr[data-slug="${slug}"]`);
+    if(!row) return;
+    const statusCell = row.cells[2];
+    const statusSpan = statusCell.querySelector('span');
+    if(statusSpan){
+      statusSpan.textContent = newStatus;
+      statusSpan.style.color = newStatus==='done'? '#22C55E': newStatus==='fetching'? '#EAB308':'#9CA3AF';
+    }
+  }
+
+  function updateJobCountForSlug(slug, count) {
+    const row = document.querySelector(`tr[data-slug="${slug}"]`);
+    if(row) row.cells[3].textContent = count || 0;
+  }
+
+  function attachRowEventHandlers() {
+    document.querySelectorAll('.view').forEach(b=>b.addEventListener('click', ()=>{ location.href = '/jobs/'+b.dataset.slug; }));
+    document.querySelectorAll('.fetch').forEach(b=>b.addEventListener('click', ()=>fetchCohort(b.dataset.slug)));
+    document.querySelectorAll('.stop').forEach(b=>b.addEventListener('click', ()=>stopCohort(b.dataset.slug)));
+    document.querySelectorAll('.del').forEach(b=>b.addEventListener('click', ()=>deleteCohort(b.dataset.slug)));
   }
 
   async function loadCohorts(){
     const el = document.getElementById('cohortsWrap');
-    const r = await fetch('/api/cohorts');
-    const d = await r.json();
-    const cohorts = d.cohorts || {};
-    if(Object.keys(cohorts).length===0){ el.innerHTML = '<div style="padding:12px;color:var(--muted)">No cohorts yet.</div>'; return; }
-    let html = '<table><thead><tr><th>Name</th><th>Keyword</th><th>Status</th><th>Jobs</th><th>Actions</th></tr></thead><tbody>';
-    Object.keys(cohorts).forEach(slug=>{
-      const c = cohorts[slug];
-      const actionButton = c.status === 'fetching'
-        ? `<button class="btn stop" data-slug="${slug}" onclick="stopCohort('${slug}')">⏹ Stop</button>`
-        : `<button class="btn fetch" data-slug="${slug}" onclick="fetchCohort('${slug}')">▶ Fetch</button>`;
-      html += `<tr><td>${c.name}</td><td style="color:var(--muted)">${c.keyword}</td><td><span style="color:${c.status==='done'? '#22C55E': c.status==='fetching'? '#EAB308':'#9CA3AF'}">${c.status}</span></td><td>${c.count||0}</td><td>`+
-              `<button class="btn view" data-slug="${slug}">View</button> `+
-              `${actionButton} `+
-              `<button class="btn del" data-slug="${slug}">Delete</button>`+
-              `</td></tr>`;
-    });
-    html += '</tbody></table>';
-    el.innerHTML = html;
-    document.querySelectorAll('.view').forEach(b=>b.addEventListener('click', ()=>{ location.href = '/jobs/'+b.dataset.slug; }));
-    document.querySelectorAll('.del').forEach(b=>b.addEventListener('click', ()=>deleteCohort(b.dataset.slug)));
+    try{
+      const r = await fetch('/api/cohorts');
+      const d = await r.json();
+      const cohorts = d.cohorts || {};
+      cohortsCache = cohorts;
+      if(Object.keys(cohorts).length===0){ el.innerHTML = '<div style="padding:12px;color:var(--muted)">No cohorts yet.</div>'; return; }
+      if(!el.querySelector('table')){
+        let html = '<table><thead><tr><th>Name</th><th>Keyword</th><th>Status</th><th>Jobs</th><th>Actions</th></tr></thead><tbody>';
+        Object.keys(cohorts).forEach(slug=>{
+          const c = cohorts[slug];
+          const actionButton = c.status === 'fetching'
+            ? `<button class="btn stop" data-slug="${slug}">⏹ Stop</button>`
+            : `<button class="btn fetch" data-slug="${slug}">▶ Fetch</button>`;
+          html += `<tr data-slug="${slug}"><td>${c.name}</td><td style="color:var(--muted)">${c.keyword}</td><td><span style="color:${c.status==='done'? '#22C55E': c.status==='fetching'? '#EAB308':'#9CA3AF'}">${c.status}</span></td><td>${c.count||0}</td><td>`+
+                  `<button class="btn view" data-slug="${slug}">View</button> `+
+                  `${actionButton} `+
+                  `<button class="btn del" data-slug="${slug}">Delete</button>`+
+                  `</td></tr>`;
+        });
+        html += '</tbody></table>';
+        el.innerHTML = html;
+        attachRowEventHandlers();
+      }else{
+        Object.keys(cohorts).forEach(slug=>{
+          const c = cohorts[slug];
+          updateStatusForSlug(slug, c.status);
+          updateJobCountForSlug(slug, c.count||0);
+          const row = document.querySelector(`tr[data-slug="${slug}"]`);
+          if(row){
+            const actionCell = row.cells[4];
+            const oldBtn = actionCell.querySelector('.fetch, .stop');
+            if(oldBtn){
+              const isOldFetch = oldBtn.classList.contains('fetch');
+              const shouldBeFetch = c.status !== 'fetching';
+              if(isOldFetch !== shouldBeFetch && !oldBtn.disabled){
+                oldBtn.remove();
+                const newBtn = document.createElement('button');
+                newBtn.className = 'btn ' + (shouldBeFetch ? 'fetch' : 'stop');
+                newBtn.dataset.slug = slug;
+                newBtn.textContent = shouldBeFetch ? '▶ Fetch' : '⏹ Stop';
+                actionCell.insertBefore(newBtn, actionCell.querySelector('.del'));
+                newBtn.addEventListener('click', ()=> shouldBeFetch ? fetchCohort(slug) : stopCohort(slug));
+              }
+            }
+          }
+        });
+      }
+    }catch(e){}
   }
 
   loadCohorts();
-  setInterval(loadCohorts,3000);
+  setInterval(loadCohorts, 5000);
 })();
 </script>
 </body>

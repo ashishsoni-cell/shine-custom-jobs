@@ -102,8 +102,8 @@ except Exception:
 # Background fetch thread
 def fetch_jobs_for_cohort(slug, keyword, limit=JOBS_PER_COHORT):
     global FETCH_PAUSED
-    print(f"[FETCH START] slug={slug} keyword={keyword}", flush=True)
-    print(f"[SERP KEY] {'set' if SERP_API_KEY else 'MISSING'}", flush=True)
+    print(f"[FETCH START] {slug} keyword={keyword}", flush=True)
+    print(f"[SERP KEY CHECK] key={'SET' if SERP_API_KEY else 'MISSING'}", flush=True)
     with cohorts_lock:
         cohort_status[slug] = {'status': 'fetching', 'count': 0}
     jobs = []
