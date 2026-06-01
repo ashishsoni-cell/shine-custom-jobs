@@ -1,0 +1,16 @@
+{
+  "cohorts": {
+    "work-from-home": {
+      "query": "work from home jobs India",
+      "location": "India",
+      "limit": 50,
+      "cache_ttl_hours": 6
+    },
+    "ai-ml": {
+      "query": "AI ML Engineer jobs India",
+      "location": "Bangalore",
+      "limit": 50,
+      "cache_ttl_hours": 6
+    }
+  }
+}

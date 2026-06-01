@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Shine — Cohort</title>
+  <style>
+    :root{--bg:#0D0D0D;--surface:#111111;--border:#2A2A2A;--green:#22C55E;--yellow:#EAB308;--text:#F9FAFB;--muted:#9CA3AF}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+    .container{max-width:1100px;margin:24px auto;padding:16px}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .logo{font-weight:800;color:var(--green);font-size:20px}
+    .cta a{background:var(--green);color:#000;padding:10px 14px;border-radius:8px;text-decoration:none;font-weight:700}
+    .hero{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:20px;border-radius:12px;margin-top:16px}
+    .pill{display:inline-block;padding:6px 12px;border-radius:20px;background:#111827;color:var(--yellow);font-weight:700}
+    .stats{display:flex;gap:12px;margin-top:12px}
+    .stat{background:var(--surface);padding:12px;border-radius:12px;flex:1;border:1px solid var(--border);text-align:center}
+    .filters{display:flex;gap:10px;align-items:center;margin:18px 0}
+    .filter-btn{background:transparent;border:1px solid var(--border);padding:8px 12px;border-radius:20px;color:var(--muted);cursor:pointer}
+    .filter-btn.active{border-color:var(--green);color:var(--text)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+    .card{background:var(--surface);padding:14px;border-radius:12px;border:1px solid var(--border);transition:transform .12s,border-color .12s}
+    .card:hover{transform:translateY(-2px);border-color:var(--green)}
+    .card-top{display:flex;align-items:center;gap:12px}
+    .logo-thumb{width:48px;height:48px;border-radius:8px;background:#222;display:flex;align-items:center;justify-content:center;font-weight:800}
+    .badge{padding:6px 10px;border-radius:12px;font-weight:700}
+    .badge.wfh{background:#0ea5ff;color:#000}
+    .badge.hiring{background:var(--green);color:#000}
+    .title{font-weight:700;margin:8px 0}
+    .company{color:var(--muted);font-size:0.95rem}
+    .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .pill-sm{background:#0b0b0b;padding:6px 8px;border-radius:12px;border:1px solid var(--border);color:var(--muted);font-size:.85rem}
+    .desc{color:var(--muted);display:block;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+    .card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:12px}
+    .apply{background:var(--green);color:#000;padding:8px 10px;border-radius:8px;text-decoration:none;font-weight:700}
+    .alert-strip{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;background:linear-gradient(90deg,#111, #121212);padding:12px;border-radius:12px;border:1px solid var(--border);display:flex;gap:8px;align-items:center}
+    .spinner{width:28px;height:28px;border:4px solid #222;border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .empty{padding:48px;text-align:center;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">shine</div>
+      <div class="cta"><a href="/admin">Post Your Resume →</a></div>
+    </div>
+
+    <div class="hero">
+      <span class="pill">🔥 Active Hiring</span>
+      <h1 id="clpTitle">Find the Best Roles</h1>
+      <p id="clpSubtitle">Fresh listings updated daily. One-click apply, no login required.</p>
+      <div class="stats">
+        <div class="stat"><div id="statJobs">Jobs Available<br><strong>0</strong></div></div>
+        <div class="stat"><div id="statCompanies">Companies Hiring<br><strong>0</strong></div></div>
+        <div class="stat"><div>24h Avg Response<br><strong>—</strong></div></div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="wfh">🏠 Work From Home</button>
+      <button class="filter-btn" data-filter="fulltime">Full-time</button>
+      <button class="filter-btn" data-filter="week">Posted This Week</button>
+      <div style="margin-left:auto;padding:6px 10px;border-radius:12px;background:#0b0b0b;border:1px solid var(--border)"><span id="countPill">0</span></div>
+    </div>
+
+    <div id="loading" style="display:none" class="empty"><div class="spinner"></div><div id="loadingText">Fetching latest roles...</div></div>
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" style="display:none">No jobs yet — check back soon.</div>
+  </div>
+
+  <div class="alert-strip">
+    <div>📬 Get New <span id="alertCohort">roles</span> in Your Inbox</div>
+    <input id="alertEmail" placeholder="you@domain.com" style="background:#0b0b0b;border:1px solid var(--border);color:var(--text);padding:8px;border-radius:8px">
+    <button id="setAlert" style="background:var(--yellow);color:#000;padding:8px 12px;border-radius:8px;border:none;font-weight:700">Set Alert →</button>
+  </div>
+
+<script>
+(function(){
+  const slug = window.COHORT_SLUG || (location.pathname.split('/jobs/')[1]||'').replace(/\/+$/,'');
+  const grid = document.getElementById('grid');
+  const loading = document.getElementById('loading');
+  const empty = document.getElementById('empty');
+  const countPill = document.getElementById('countPill');
+  const statJobs = document.getElementById('statJobs');
+  const statCompanies = document.getElementById('statCompanies');
+  const alertCohort = document.getElementById('alertCohort');
+  alertCohort.textContent = slug || 'cohort';
+
+  if(!slug){ document.getElementById('clpTitle').textContent='Cohort not found'; loading.style.display='none'; empty.style.display='block'; return; }
+  document.getElementById('clpTitle').textContent = 'Find the Best ' + slug.replace(/-/g,' ');
+
+  let polling = null;
+  let jobsData = [];
+
+  function renderJobs(jobs){
+    grid.innerHTML = '';
+    if(!jobs || jobs.length===0){ empty.style.display='block'; return; }
+    empty.style.display='none';
+    const companies = new Set();
+    jobs.forEach(j=>{
+      companies.add(j.company||'');
+      const card = document.createElement('article'); card.className='card';
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="logo-thumb">${j.thumbnail?'<img src="'+j.thumbnail+'" style="width:100%;height:100%;object-fit:cover;border-radius:8px">':'🏢'}</div>
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px"><div class="title">${escapeHtml(j.title||'Untitled')}</div><div class="badge ${j.work_from_home? 'wfh':'hiring'}">${j.work_from_home? 'WFH':'🔥 Hiring'}</div></div>
+            <div class="company">${escapeHtml(j.company||'')}</div>
+          </div>
+        </div>
+        <div class="meta">
+          <div class="pill-sm">${escapeHtml(j.location||'')} </div>
+          <div class="pill-sm">${escapeHtml(j.schedule||'')}</div>
+          <div class="pill-sm">${escapeHtml(j.salary||'')}</div>
+        </div>
+        <p class="desc">${escapeHtml((j.description||'').replace(/\n/g,' '))}</p>
+        <div class="card-footer">
+          <div style="color:var(--muted);font-size:.9rem">${escapeHtml(j.posted_at||'')}</div>
+          <a class="apply" href="${j.apply_url||'https://www.shine.com/pages/myshine/job-apply-flow?job-apply-flow=true'}" target="_blank" rel="noopener">Quick Apply →</a>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+    statJobs.innerHTML = `Jobs Available<br><strong>${jobs.length}</strong>`;
+    statCompanies.innerHTML = `Companies Hiring<br><strong>${companies.size}</strong>`;
+    countPill.textContent = jobs.length;
+  }
+
+  function fetchOnce(){
+    loading.style.display='block';
+    document.getElementById('loadingText').textContent = 'Fetching latest ' + slug + '...';
+    fetch('/api/jobs?cohort='+encodeURIComponent(slug)).then(r=>r.json()).then(data=>{
+      const jobs = data.jobs || [];
+      jobsData = jobs;
+      renderJobs(jobs);
+      if(data.status === 'done'){
+        clearInterval(polling);
+        loading.style.display='none';
+      } else {
+        // continue polling until done
+        loading.style.display = 'block';
+      }
+    }).catch(e=>{ console.error(e); document.getElementById('loadingText').textContent='Unable to load jobs'; });
+  }
+
+  fetchOnce();
+  polling = setInterval(fetchOnce, 3000);
+
+  // Filters (simple client-side)
+  document.querySelectorAll('.filter-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      let filtered = jobsData.slice();
+      if(f==='wfh') filtered = filtered.filter(j=>j.work_from_home);
+      if(f==='fulltime') filtered = filtered.filter(j=>/full/i.test(j.schedule||'')||/full/i.test(j.title||''));
+      if(f==='week') filtered = filtered.filter(j=>/(today|day|hour|week)/i.test(j.posted_at||''));
+      renderJobs(filtered);
+    });
+  });
+
+  document.getElementById('setAlert').addEventListener('click',()=>{
+    const email = document.getElementById('alertEmail').value.trim();
+    if(!email) return alert('Please enter an email');
+    alert('Alert set for '+email);
+    document.getElementById('alertEmail').value='';
+  });
+
+  function escapeHtml(s){ return String(s||'')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+})();
+</script>
+</body>
+</html>

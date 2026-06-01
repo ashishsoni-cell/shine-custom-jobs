@@ -1,0 +1,110 @@
+[
+  {
+    "name": "work-from-home-jobs",
+    "label": "Work From Home Jobs",
+    "keywords": [
+      "work from home",
+      "remote work",
+      "WFH"
+    ],
+    "companies": [
+      "Google",
+      "Microsoft",
+      "Amazon",
+      "Flipkart",
+      "Razorpay",
+      "Swiggy",
+      "Zomato",
+      "PhonePe",
+      "Meesho",
+      "Paytm",
+      "CRED",
+      "Freshworks",
+      "Zoho",
+      "Infosys",
+      "Wipro"
+    ],
+    "cities": [
+      "Bangalore",
+      "Mumbai",
+      "Delhi",
+      "Hyderabad",
+      "Pune",
+      "Chennai",
+      "Noida",
+      "Gurgaon"
+    ]
+  },
+  {
+    "name": "ai-ml-jobs",
+    "label": "AI / ML Jobs",
+    "keywords": [
+      "machine learning engineer",
+      "AI engineer",
+      "data scientist",
+      "NLP engineer"
+    ],
+    "companies": [
+      "Google",
+      "Microsoft",
+      "Amazon",
+      "Flipkart",
+      "Ola",
+      "Swiggy",
+      "PhonePe",
+      "HDFC Bank",
+      "Jio",
+      "Infosys",
+      "TCS",
+      "Wipro",
+      "Accenture",
+      "IBM",
+      "Meta"
+    ],
+    "cities": [
+      "Bangalore",
+      "Hyderabad",
+      "Mumbai",
+      "Delhi",
+      "Pune",
+      "Chennai"
+    ]
+  },
+  {
+    "name": "tech-jobs",
+    "label": "Tech Jobs",
+    "keywords": [
+      "software engineer",
+      "backend engineer",
+      "frontend developer",
+      "full stack developer"
+    ],
+    "companies": [
+      "Google",
+      "Microsoft",
+      "Amazon",
+      "Flipkart",
+      "Razorpay",
+      "Swiggy",
+      "Zomato",
+      "PhonePe",
+      "HDFC Bank",
+      "Jio",
+      "Ola",
+      "CRED",
+      "Freshworks",
+      "Zoho",
+      "Paytm"
+    ],
+    "cities": [
+      "Bangalore",
+      "Hyderabad",
+      "Mumbai",
+      "Delhi",
+      "Pune",
+      "Chennai",
+      "Noida",
+      "Gurgaon"
+    ]
+  }
+]

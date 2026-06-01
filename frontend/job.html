@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Job Details — Shine</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Plus Jakarta Sans",sans-serif;background:#F4F5F7;color:#0D1117}
+.nav{background:#fff;border-bottom:1px solid #E4E7EC;padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.back{display:flex;align-items:center;gap:6px;color:#344054;font-size:.875rem;font-weight:500;cursor:pointer;border:none;background:none;text-decoration:none}
+.layout{max-width:1180px;margin:24px auto;padding:0 24px;display:grid;grid-template-columns:1fr 320px;gap:24px}
+.card{background:#fff;border:1px solid #E4E7EC;border-radius:16px;padding:28px 32px}
+.badge{display:inline-block;background:#EAFAF0;color:#0E9A5A;border:1px solid #A7F3D0;border-radius:999px;padding:4px 12px;font-size:.75rem;font-weight:600;margin-bottom:16px}
+h1{font-size:1.5rem;font-weight:700;margin-bottom:20px}
+hr{border:none;border-top:1px solid #E4E7EC;margin:20px 0}
+.meta-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:16px 0}
+.meta-label{font-size:.75rem;color:#667085;margin-bottom:4px}
+.meta-val{font-size:.9375rem;font-weight:700}
+.apply-btn{background:#0B3FCC;color:#fff;border:none;border-radius:8px;padding:12px 28px;font-size:.9375rem;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;font-family:inherit}
+.apply-btn:hover{background:#0A33A6}
+.section{margin-top:32px}
+.section-heading{font-size:1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:12px}
+.section-heading::before{content:"";display:inline-block;width:3px;height:20px;background:#1A56FF;border-radius:2px}
+.skills{display:flex;flex-wrap:wrap;gap:8px}
+.skill{background:#fff;border:1px solid #E4E7EC;border-radius:999px;padding:6px 14px;font-size:.8125rem;font-weight:500;color:#344054}
+.description{font-size:.9375rem;line-height:1.7;color:#344054;white-space:pre-wrap}
+.sidebar{position:sticky;top:72px}
+.co-card{background:#fff;border:1px solid #E4E7EC;border-radius:16px;padding:24px}
+.co-logo{width:56px;height:56px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:700;color:#fff;margin-bottom:12px}
+.co-name{font-size:1rem;font-weight:700;margin-bottom:4px}
+.co-meta{font-size:.8125rem;color:#667085;margin-bottom:12px}
+.co-link{display:flex;align-items:center;gap:5px;font-size:.8125rem;font-weight:600;color:#0B3FCC;text-decoration:none}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(16px);background:#232A38;color:#fff;padding:10px 20px;border-radius:999px;font-size:.875rem;opacity:0;transition:all .25s;z-index:1000;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:768px){.layout{grid-template-columns:1fr;padding:0}.card{border-radius:0}.meta-grid{grid-template-columns:repeat(2,1fr)}.sidebar{position:static}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a class="back" id="backBtn" href="/">← Job Details</a>
+  <button onclick="shareJob()" style="width:32px;height:32px;border-radius:50%;border:1px solid #E4E7EC;background:#fff;cursor:pointer">⬆</button>
+</nav>
+<div class="layout">
+  <div class="card">
+    <span class="badge" id="activeBadge" style="display:none">Actively Hiring</span>
+    <h1 id="jobTitle">Loading...</h1>
+    <hr/>
+    <div><div style="font-size:.75rem;color:#667085;margin-bottom:4px">Location</div><div style="font-size:.9375rem;font-weight:600" id="jobLocation">—</div></div>
+    <hr/>
+    <div class="meta-grid">
+      <div><div class="meta-label">Experience</div><div class="meta-val" id="jobExp">—</div></div>
+      <div><div class="meta-label">Salary</div><div class="meta-val" id="jobSalary">—</div></div>
+      <div><div class="meta-label">Employment Type</div><div class="meta-val" id="jobType">—</div></div>
+      <div><div class="meta-label">Work Mode</div><div class="meta-val" id="jobMode">—</div></div>
+    </div>
+    <hr/>
+    <div style="border:1.5px solid #C9DBFF;border-radius:12px;padding:18px 20px;background:linear-gradient(135deg,#F8FAFF,#EEF3FF);display:flex;align-items:center;gap:16px;margin:24px 0">
+      <div style="flex:1"><div style="font-size:.875rem;font-weight:700;margin-bottom:3px">Don't apply blind. Know exactly where you stand before you apply</div><div style="font-size:.75rem;color:#667085">Upload your resume · get your match %, matched skills & gaps instantly</div></div>
+      <button onclick="alert('Coming soon!')" style="background:#0B3FCC;color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:.8125rem;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit">Upload Resume</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;margin:20px 0">
+      <a class="apply-btn" id="applyBtn" href="#" target="_blank">Apply Now</a>
+    </div>
+    <div class="section" id="skillsSection" style="display:none">
+      <div class="section-heading">Skills For This Role</div>
+      <div class="skills" id="skillsList"></div>
+    </div>
+    <div class="section" id="descSection" style="display:none">
+      <div class="section-heading">Job Description</div>
+      <div class="description" id="jobDesc"></div>
+    </div>
+  </div>
+  <aside class="sidebar">
+    <div class="co-card">
+      <div class="co-logo" id="coLogo">?</div>
+      <div class="co-name" id="coName">—</div>
+      <div class="co-meta" id="coMeta"></div>
+      <a class="co-link" id="coLink" href="#" target="_blank">Visit Website ↗</a>
+    </div>
+  </aside>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const COLORS=['#4285F4','#292075','#A100FF','#006BB6','#635BFF','#F58220','#0070AD','#4A5568','#0E9A5A'];
+function colorFor(n){let h=0;for(let i=0;i<(n||'').length;i++)h=(h*31+n.charCodeAt(i))|0;return COLORS[Math.abs(h)%COLORS.length]}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500)}
+function shareJob(){navigator.clipboard.writeText(location.href).then(()=>toast('Link copied!')).catch(()=>toast('Copy: '+location.href))}
+
+// Mock jobs — matches index.html
+const MOCK_JOBS = [
+  {
+    id: 'job-1',
+    title: 'Senior Product Manager',
+    company: 'Shine Labs',
+    location: 'Bengaluru',
+    salaryMin: 1800000,
+    salaryMax: 2600000,
+    experience: '5-8 yrs',
+    jobType: 'Full Time',
+    postedDate: 'Today',
+    urgencyBadge: 'Actively Hiring',
+    appliedToday: 24,
+    skills: ['Product Strategy', 'Roadmap Planning', 'Stakeholder Management', 'Data Analysis']
+  },
+  {
+    id: 'job-2',
+    title: 'Lead UX Designer',
+    company: 'GlowTech',
+    location: 'Mumbai',
+    salaryMin: 1500000,
+    salaryMax: 2200000,
+    experience: '4-7 yrs',
+    jobType: 'Full Time',
+    postedDate: '2 days ago',
+    urgencyBadge: 'Urgent',
+    appliedToday: 18,
+    skills: ['UX Research', 'Interaction Design', 'Prototyping', 'Design Systems']
+  },
+  {
+    id: 'job-3',
+    title: 'Data Scientist',
+    company: 'Quantica',
+    location: 'Pune',
+    salaryMin: 1700000,
+    salaryMax: 2500000,
+    experience: '3-6 yrs',
+    jobType: 'Full Time',
+    postedDate: 'Yesterday',
+    urgencyBadge: 'Closing Soon',
+    appliedToday: 33,
+    skills: ['Machine Learning', 'Python', 'Statistics', 'Data Visualization']
+  },
+  {
+    id: 'job-4',
+    title: 'Engineering Manager',
+    company: 'Nexa Solutions',
+    location: 'Chennai',
+    salaryMin: 2100000,
+    salaryMax: 3000000,
+    experience: '7-10 yrs',
+    jobType: 'Full Time',
+    postedDate: 'Today',
+    urgencyBadge: 'Actively Hiring',
+    appliedToday: 12,
+    skills: ['Team Leadership', 'Agile Delivery', 'Technical Strategy', 'Cloud Architecture']
+  },
+  {
+    id: 'job-5',
+    title: 'Sales Director',
+    company: 'BrightHire',
+    location: 'Hyderabad',
+    salaryMin: 1400000,
+    salaryMax: 2000000,
+    experience: '8-12 yrs',
+    jobType: 'Full Time',
+    postedDate: '3 days ago',
+    urgencyBadge: 'Urgent',
+    appliedToday: 29,
+    skills: ['Enterprise Sales', 'Client Relationships', 'Pipeline Management', 'Negotiation']
+  },
+  {
+    id: 'job-6',
+    title: 'Customer Success Lead',
+    company: 'SparkWorks',
+    location: 'Delhi',
+    salaryMin: 1200000,
+    salaryMax: 1600000,
+    experience: '4-6 yrs',
+    jobType: 'Full Time',
+    postedDate: '1 day ago',
+    urgencyBadge: 'Closing Soon',
+    appliedToday: 14,
+    skills: ['Client Onboarding', 'Retention', 'Product Adoption', 'Support Operations']
+  }
+];
+
+function formatSalary(job){
+  return '₹' + (job.salaryMin/100000).toFixed(job.salaryMin%100000===0?0:1).replace('.0','') + ' - ₹' + (job.salaryMax/100000).toFixed(job.salaryMax%100000===0?0:1).replace('.0','') + ' LPA';
+}
+
+function init(){
+  const params = new URLSearchParams(location.search);
+  const jobId = params.get('id');
+  
+  if(!jobId){
+    document.body.innerHTML='<div style="text-align:center;padding:64px"><h2>Job not found</h2><a href="/">← Back</a></div>';
+    return;
+  }
+  
+  const job = MOCK_JOBS.find(j => j.id === jobId);
+  if(!job){
+    document.body.innerHTML='<div style="text-align:center;padding:64px"><h2>Job not found</h2><a href="/">← Back</a></div>';
+    return;
+  }
+  
+  document.title = job.title + ' at ' + job.company + ' — Shine';
+  
+  if(job.urgencyBadge === 'Actively Hiring'){
+    document.getElementById('activeBadge').style.display='inline-block';
+  }
+  
+  document.getElementById('jobTitle').textContent = job.title;
+  document.getElementById('jobLocation').textContent = job.location || 'All India';
+  document.getElementById('jobExp').textContent = job.experience || 'Not specified';
+  document.getElementById('jobSalary').textContent = formatSalary(job);
+  document.getElementById('jobType').textContent = job.jobType || 'Full Time';
+  document.getElementById('jobMode').textContent = 'Onsite';
+  
+  document.getElementById('applyBtn').href = 'https://www.shine.com/pages/myshine/job-apply-flow?job-apply-flow=true';
+  
+  if(job.skills && job.skills.length > 0){
+    document.getElementById('skillsList').innerHTML = job.skills.map(s => '<span class="skill">'+s+'</span>').join('');
+    document.getElementById('skillsSection').style.display = '';
+  }
+  
+  const coLogo = document.getElementById('coLogo');
+  coLogo.textContent = job.company[0].toUpperCase();
+  coLogo.style.background = colorFor(job.company);
+  document.getElementById('coName').textContent = job.company;
+  document.getElementById('coMeta').textContent = 'Posted ' + job.postedDate;
+  
+  document.getElementById('backBtn').href = '/';
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

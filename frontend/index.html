@@ -1,0 +1,3037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Shine · JSRP — Job Search Results</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  /* ════════════════════════════════════════════════════════════════════════
+     SHINE DESIGN SYSTEM — Semantic Tokens (Light Mode)
+     Source: DESIGN-SYSTEM.md  ·  Plus Jakarta Sans · 4px base grid
+     Core rule: components consume SEMANTIC tokens only.
+     ════════════════════════════════════════════════════════════════════════ */
+  :root {
+    /* ── PRIMITIVE COLOR (internal — referenced by semantics only) ── */
+    --c-brand-50:#F0F5FF;  --c-brand-100:#EBF0FF; --c-brand-200:#C9DBFF;
+    --c-brand-500:#1A56FF; --c-brand-600:#0B3FCC; --c-brand-700:#0A33A6;
+    --c-cn-50:#F7F9FB;     --c-cn-100:#EEF1F5;   --c-cn-200:#E4E7EC;
+    --c-cn-300:#C8CED7;    --c-cn-400:#98A2B3;   --c-cn-500:#667085;
+    --c-cn-700:#344054;    --c-cn-800:#232A38;   --c-cn-black:#0D1117;
+    --c-wn-100:#FAF9F6;    --c-wn-200:#F5F1E8;
+    --c-red-600:#B42318;
+    --c-green-600:#0E9A5A; --c-green-700:#027A48; --c-green-50:#EAFAF0;
+    --c-pink-100:#FCE7F3;  --c-pink-600:#BE185D;
+
+    /* ── CONTENT (text + icon) ── */
+    --content-base:           var(--c-cn-black);
+    --content-muted:          var(--c-cn-700);
+    --content-faded:          var(--c-cn-500);
+    --content-disabled:       rgba(13,17,23,0.36);
+    --content-brand:          var(--c-brand-600);
+    --content-brand-hover:    var(--c-brand-700);
+    --content-on-fill-dark:   #FFFFFF;
+    --content-on-fill-light:  var(--c-cn-black);
+    --content-pink:           var(--c-pink-600);
+    --content-positive:       var(--c-green-700);
+
+    /* ── CONTENT / INVERSE (used on dark surfaces) ── */
+    --content-inverse-base:   #FFFFFF;
+    --content-inverse-muted:  rgba(255,255,255,0.72);
+    --content-inverse-faded:  rgba(255,255,255,0.55);
+    --content-inverse-brand:  #7EA3FF;   /* brand/primary/300 — keeps AA on dark */
+
+    /* ── STROKE (borders, dividers, focus) ── */
+    --stroke-base:            var(--c-cn-200);
+    --stroke-muted:           var(--c-cn-100);
+    --stroke-faded:           var(--c-cn-50);
+    --stroke-focus:           var(--c-brand-500);
+
+    /* ── SURFACE (backgrounds + fills) ── */
+    --surface-base:           var(--c-wn-100);          /* page canvas */
+    --surface-raised:         #FFFFFF;                  /* cards / sheets */
+    --surface-muted:          var(--c-cn-50);
+    --surface-sunken:         var(--c-cn-200);
+    --surface-hover:          var(--c-cn-100);
+    --surface-pressed:        var(--c-cn-200);
+    --surface-selected:       var(--c-brand-50);
+    --surface-overlay:        rgba(13,17,23,0.35);
+    --surface-warm:           var(--c-wn-200);          /* nav chip hover */
+
+    /* Inverse / dark surface — for hero bands, dark banners */
+    --surface-inverse-base:   #0A0E14;                  /* deep near-black */
+    --surface-inverse-raised: var(--c-cn-800);
+    --surface-inverse-glow:   rgba(126,163,255,0.45);   /* aurora glow color */
+
+    --surface-brand-intense:  var(--c-brand-500);
+    --surface-brand-subtle:   var(--c-brand-100);
+    --surface-pink-subtle:    var(--c-pink-100);
+    --surface-positive-subtle:var(--c-green-50);
+
+    /* ── EFFECT TOKENS ── */
+    --shadow-raised:  0 1px 3px rgba(13,17,23,.08), 0 1px 2px rgba(13,17,23,.04);
+    --shadow-lifted:  0 12px 28px -12px rgba(13,17,23,.10);
+    --shadow-overlay: 0 16px 36px -10px rgba(13,17,23,.30), 0 4px 10px -2px rgba(13,17,23,.10);
+    --shadow-drawer:  -16px 0 40px -8px rgba(13,17,23,.18), -4px 0 12px -2px rgba(13,17,23,.08);
+
+    /* ── SIZE / RADIUS (semantic) ── */
+    --radius-xs: 2px;  --radius-sm: 4px;  --radius-md: 8px;
+    --radius-lg: 12px; --radius-xl: 16px; --radius-2xl: 24px;
+    --radius-full: 9999px;
+
+    /* ── SIZE / STROKE ── */
+    --stroke-thin: 1px;  --stroke-default: 1.5px;  --stroke-thick: 2px;
+
+    /* ── TYPOGRAPHY (semantic refs to family) ── */
+    --font-brand: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  /* ────────────────────────────────────────────────────────────
+     RESET + GLOBAL TYPOGRAPHY
+     ──────────────────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body {
+    font-family: var(--font-brand);
+    color: var(--content-base);
+    background: var(--surface-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  button { font-family: inherit; }
+
+  /* (Floating pill nav removed — JSRP POC has no other linked pages) */
+
+  /* ════════════════════════════════════════════════════════════
+     JSRP — Job Search Results Page (desktop)
+     ════════════════════════════════════════════════════════════ */
+  .view-jsrp-d {
+    background: var(--surface-base);
+    min-height: 100vh;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     DARK HERO BAND — IT-landing pattern (centered column)
+     Structure inside .jd-hero-inner:
+       eyebrow pill  →  big centered title  →  blurb  →  CTAs
+
+     States:
+     1. Default: full hero with generous vertical breathing room.
+     2. Compact (.is-compact, applied to .view-jsrp-d by JS): the
+        band collapses into a slim sticky bar with a left-aligned
+        small title + right-aligned Sort/Filter.
+     ════════════════════════════════════════════════════════════ */
+  /* ── DARK HERO BAND — full hero, NORMAL block ──
+     Per the latest Figma: tighter vertical rhythm, no blurb, no
+     inline Sort/Filter. Logo → eyebrow (dot + "1200 Jobs Found")
+     → big title is the only stack. */
+  .view-jsrp-d .jd-dark-band {
+    position: relative;
+    background: var(--surface-inverse-base);
+    color: var(--content-inverse-base);
+    overflow: hidden;
+    padding: 72px 32px 72px;
+  }
+  /* Aurora glow — soft blue radial behind the hero */
+  .view-jsrp-d .jd-dark-band::before {
+    content: ""; position: absolute;
+    top: -200px; left: 50%; transform: translateX(-50%);
+    width: 1400px; height: 1000px;
+    background: radial-gradient(circle at center, var(--surface-inverse-glow) 0%, transparent 60%);
+    filter: blur(80px);
+    pointer-events: none; z-index: 0;
+  }
+  /* Dotted grid overlay — faint white dots on a 24px grid */
+  .view-jsrp-d .jd-dark-band::after {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none; z-index: 0;
+    mask-image: linear-gradient(180deg, transparent 0%, black 25%, black 80%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 25%, black 80%, transparent 100%);
+  }
+  .view-jsrp-d .jd-dark-band > * { position: relative; z-index: 1; }
+
+  /* Centered hero column inside the dark band.
+     position:relative + z-index so it sits above the aurora/dots. */
+  .view-jsrp-d .jd-hero-inner {
+    max-width: 1180px; margin: 0 auto;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center;
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Shine logo — slightly smaller, tighter margin */
+  .view-jsrp-d .jd-hero-logo {
+    display: inline-block;
+    line-height: 0;
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: opacity 200ms ease;
+  }
+  .view-jsrp-d .jd-hero-logo:hover { opacity: 0.85; }
+  .view-jsrp-d .jd-hero-logo svg {
+    width: 64px; height: auto;
+    display: block;
+  }
+
+  /* Eyebrow — dot + count text. Sits BELOW the title now, with
+     comfortable top margin to separate it from the title block. */
+  .view-jsrp-d .jd-hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: var(--stroke-thin) solid rgba(255,255,255,0.10);
+    border-radius: var(--radius-full);
+    padding: 6px 14px;
+    margin-top: 24px;
+  }
+  /* Pink/red signal dot per Figma — stands out against the blue accent */
+  .view-jsrp-d .jd-hero-eyebrow-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--content-pink);
+    box-shadow: 0 0 8px rgba(190,24,93,0.7);
+  }
+  .view-jsrp-d .jd-hero-eyebrow-text {
+    font: 500 12.5px/1 var(--font-brand);
+    color: var(--content-inverse-muted);
+  }
+  .view-jsrp-d .jd-hero-eyebrow-text b {
+    color: var(--content-inverse-base);
+    font-weight: 700;
+  }
+
+  /* Title — full hero size */
+  .view-jsrp-d .jd-dark-band .jd-hero-h {
+    margin: 0;
+    font-family: var(--font-brand);
+    font-weight: 800;
+    font-size: 56px;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: var(--content-inverse-base);
+    max-width: 880px;
+    text-align: center;
+  }
+  .view-jsrp-d .jd-dark-band .jd-hero-h .accent {
+    color: var(--content-inverse-brand);
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     CONTROLS ROW — companies carousel + Sort/Filter pills
+     Sits BETWEEN the dark hero and the job cards, INSIDE the
+     page container with no white background — so it reads as
+     part of the results section rather than a separate header band.
+     The canonical Sort + Filter handlers live here; the compact
+     sticky bar proxies to them on scroll.
+     ════════════════════════════════════════════════════════════ */
+  .view-jsrp-d .jd-controls-row {
+    position: relative;
+    background: transparent;
+  }
+  .view-jsrp-d .jd-subnav-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 56px 0 44px;
+    display: flex;
+    align-items: center;
+    gap: 192px;  /* strong visual break between companies and sort cluster (2× from prior 96px) */
+  }
+
+  /* Companies carousel */
+  .view-jsrp-d .jd-companies {
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .view-jsrp-d .jd-companies-nav {
+    width: 32px; height: 32px;
+    flex-shrink: 0;
+    border-radius: var(--radius-full);
+    border: var(--stroke-thin) solid var(--stroke-base);
+    background: var(--surface-raised);
+    color: var(--content-muted);
+    display: grid; place-items: center;
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms, color 120ms;
+  }
+  .view-jsrp-d .jd-companies-nav:hover {
+    background: var(--surface-hover);
+    color: var(--content-base);
+  }
+  .view-jsrp-d .jd-companies-nav:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+  .view-jsrp-d .jd-companies-nav svg { width: 14px; height: 14px; }
+
+  .view-jsrp-d .jd-companies-track {
+    flex: 1; min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;  /* Increased breathing room between chips */
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    /* Hide scrollbar but keep functionality */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .view-jsrp-d .jd-companies-track::-webkit-scrollbar { display: none; }
+
+  /* ── Avatar pill chip — circular brand-colored avatar + company name ── */
+  /* Static chip — matches the sticky compact bar's pill style.
+     Outlined transparent default, brand-gradient fill when active.
+     Label-only (avatar markup is kept in the DOM but hidden via the
+     rule below) so the static row reads the same as the sticky row. */
+  .view-jsrp-d .jd-company {
+    flex-shrink: 0;
+    height: 38px;
+    padding: 0 16px;
+    background: transparent;
+    border: var(--stroke-thin) solid var(--stroke-base);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+    transition: all 160ms ease;
+    position: relative;
+    color: var(--content-muted);
+  }
+  .view-jsrp-d .jd-company:hover {
+    background: var(--surface-raised);
+    border-color: var(--content-faded);
+    color: var(--content-base);
+  }
+  /* Active — brand-blue gradient fill with soft lift shadow */
+  .view-jsrp-d .jd-company.is-on {
+    background: linear-gradient(135deg, #1A56FF 0%, #4D7CFF 100%);
+    border-color: transparent;
+    color: #FFFFFF;
+    box-shadow: 0 4px 10px -2px rgba(26,86,255,0.35);
+  }
+  .view-jsrp-d .jd-company.is-on .jd-company-label {
+    color: #FFFFFF;
+  }
+
+  /* "All Companies" — same pill, no special padding */
+  .view-jsrp-d .jd-company--all .jd-company-label {
+    font: 700 13px/1 var(--font-brand);
+  }
+
+  /* Avatars HIDDEN — chips are label-only in both static and sticky
+     rows. (The avatar markup is kept in the DOM for forward-compat
+     in case a future variant wants to show them again.) */
+  .view-jsrp-d .jd-company-avatar {
+    display: none;
+  }
+
+  /* Label */
+  .view-jsrp-d .jd-company-label {
+    font: 600 13px/1 var(--font-brand);
+    color: inherit;
+    white-space: nowrap;
+    transition: color 160ms ease;
+  }
+
+  /* Sort + Filter row on the right */
+  .view-jsrp-d .jd-subnav-ctas {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  /* Sort + Filter pills — light-mode styling (cream surface) */
+  .view-jsrp-d .jd-subnav-ctas .jd-sort-btn,
+  .view-jsrp-d .jd-subnav-ctas .jd-filter-btn {
+    height: 38px;
+    padding: 0 16px;
+    background: var(--surface-raised);
+    border: var(--stroke-thin) solid var(--stroke-base);
+    border-radius: var(--radius-full);
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 600 13px/1 var(--font-brand);
+    color: var(--content-base);
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms;
+    position: relative;
+  }
+  .view-jsrp-d .jd-subnav-ctas .jd-sort-btn:hover,
+  .view-jsrp-d .jd-subnav-ctas .jd-filter-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--content-faded);
+  }
+  .view-jsrp-d .jd-subnav-ctas .jd-sort-btn.is-open,
+  .view-jsrp-d .jd-subnav-ctas .jd-filter-btn.is-open {
+    border-color: var(--content-base);
+  }
+  .view-jsrp-d .jd-subnav-ctas .jd-sort-btn svg,
+  .view-jsrp-d .jd-subnav-ctas .jd-filter-btn svg { width: 14px; height: 14px; }
+  .view-jsrp-d .jd-subnav-ctas .jd-sort-btn b {
+    font-weight: 700; color: var(--content-base);
+  }
+  .view-jsrp-d .jd-subnav-ctas .jd-sort-btn .sort-label {
+    color: var(--content-faded); font-weight: 500;
+  }
+  .view-jsrp-d .jd-subnav-ctas .jd-filter-btn .badge {
+    min-width: 18px; height: 18px; padding: 0 5px;
+    background: var(--content-base);
+    color: var(--content-on-fill-dark);
+    border-radius: var(--radius-full);
+    font-size: 10px; font-weight: 800;
+    display: none; place-items: center;
+  }
+  .view-jsrp-d .jd-subnav-ctas .jd-filter-btn .badge.show { display: grid; }
+
+  /* Sort popover on cream surface (already mostly defined globally
+     above; ensure it reads right with the new container) */
+  .view-jsrp-d .jd-subnav-ctas .jd-sort-pop {
+    position: absolute; top: 46px; right: 0;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     COMPACT STICKY BAR
+     ────────────────────────────────────────────────────────────
+     Sits below the dark hero in the document. position:sticky
+     with top:0 means it pins to the top of the viewport once
+     its natural position scrolls into view. Hidden by default
+     via translateY(-100%) + opacity: 0 — it sits ABOVE its
+     own anchor point so it's invisible to the user until JS
+     toggles .is-revealed, which slides it DOWN into view from
+     above the viewport edge.
+
+     This is the standard pattern (LinkedIn, Indeed, etc.): a
+     completely independent sticky element that animates only
+     transform + opacity (GPU-only, no layout). No interpolation
+     on the hero itself, no stacked layouts.
+     ════════════════════════════════════════════════════════════ */
+  /* ════════════════════════════════════════════════════════════
+     COMPACT STICKY BAR — Floating-card design (Sample 2 refined)
+     A polished rounded card with margin from viewport edges,
+     subtle white-to-cream gradient, layered shadow, and a soft
+     brand glow behind it for elevation. Two rows inside:
+       Row 1 = logo · vdiv · title · spacer · Sort/Filter
+       Row 2 = companies tabs with brand-underline active state
+     ════════════════════════════════════════════════════════════ */
+  /* Dark sticky compact bar — full viewport width, dark surface
+     extends edge-to-edge. Inner rows (.jd-compact-bar-inner and
+     .jd-compact-companies) cap at 1180px so the content stays
+     aligned with the page container. Matches the dark hero band's
+     surface, aurora glow, and dotted overlay. */
+  .view-jsrp-d .jd-compact-bar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    /* Negative top margin lifts the bar's natural slot out of flow
+       so it's invisible until scrolled. Full viewport width — no
+       max-width, no horizontal margin, no rounded corners. */
+    margin: -160px 0 0;
+    background: var(--surface-inverse-base);
+    color: var(--content-inverse-base);
+    border-bottom: var(--stroke-thin) solid rgba(255,255,255,0.08);
+    box-shadow: 0 8px 24px -10px rgba(0,0,0,0.40);
+    overflow: hidden;
+    /* Hidden by default — slide in via transform + opacity */
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 280ms cubic-bezier(0.32, 0.72, 0, 1),
+                opacity 220ms ease;
+    will-change: transform, opacity;
+  }
+  /* Aurora glow — re-centered on viewport since the bar is now
+     full-width. Wider radial to match the broader surface. */
+  .view-jsrp-d .jd-compact-bar::before {
+    content: ""; position: absolute;
+    top: -160px; left: 50%; transform: translateX(-50%);
+    width: 1400px; height: 600px;
+    background: radial-gradient(circle at center, var(--surface-inverse-glow) 0%, transparent 60%);
+    filter: blur(80px);
+    pointer-events: none; z-index: 0;
+  }
+  /* Dotted overlay spans full width */
+  .view-jsrp-d .jd-compact-bar::after {
+    content: ""; position: absolute; inset: 0;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+    pointer-events: none; z-index: 0;
+    mask-image: linear-gradient(180deg, transparent 0%, black 30%, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, black 30%, black 70%, transparent 100%);
+  }
+  /* Inner content sits above the decorative layers */
+  .view-jsrp-d .jd-compact-bar > * { position: relative; z-index: 1; }
+
+  .view-jsrp-d.is-compact .jd-compact-bar {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ── Inline count pill on dark sticky bar — subtle translucent
+        chip next to the query. Brand-blue glow dot on the left,
+        white count text, muted suffix. ── */
+  .view-jsrp-d .jd-compact-count-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(255,255,255,0.06);
+    border: var(--stroke-thin) solid rgba(255,255,255,0.10);
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+  }
+  .view-jsrp-d .jd-compact-count-pill-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--content-inverse-brand);
+    box-shadow: 0 0 8px rgba(126,163,255,0.70);
+  }
+  .view-jsrp-d .jd-compact-count-pill .jd-compact-count {
+    font: 700 12px/1 var(--font-brand);
+    color: var(--content-inverse-base);
+    letter-spacing: -0.005em;
+  }
+  .view-jsrp-d .jd-compact-count-pill .jd-compact-count-suffix {
+    font: 500 11.5px/1 var(--font-brand);
+    color: var(--content-inverse-faded);
+  }
+
+  /* ── Row 1: brand cluster · spacer · Sort/Filter ── */
+  .view-jsrp-d .jd-compact-bar-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-bottom: var(--stroke-thin) solid rgba(255,255,255,0.08);
+    position: relative;
+  }
+  /* Logo + vdiv + title sit as one tight cluster */
+  .view-jsrp-d .jd-compact-cluster {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+    min-width: 0;
+  }
+  .view-jsrp-d .jd-compact-logo {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    line-height: 0;
+    flex-shrink: 0;
+    transition: opacity 160ms ease;
+  }
+  .view-jsrp-d .jd-compact-logo:hover { opacity: 0.85; }
+  .view-jsrp-d .jd-compact-logo svg {
+    height: 30px;
+    width: auto;
+    display: block;
+  }
+  /* On dark surface, the SVG's white paths stay white — no override
+     needed. (Removed previous light-surface recolor.) */
+  /* Vertical divider between logo and title (dark surface) */
+  .view-jsrp-d .jd-compact-vdiv {
+    width: 1px; height: 22px;
+    background: rgba(255,255,255,0.14);
+    flex-shrink: 0;
+  }
+
+  /* Title — clean typographic stack, no busy pill */
+  .view-jsrp-d .jd-compact-h {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    font-weight: 400;
+  }
+  .view-jsrp-d .jd-compact-count {
+    font: 800 16px/1 var(--font-brand);
+    color: var(--content-base);
+    letter-spacing: -0.01em;
+    flex-shrink: 0;
+  }
+  .view-jsrp-d .jd-compact-count-suffix {
+    font: 500 13px/1 var(--font-brand);
+    color: var(--content-faded);
+    flex-shrink: 0;
+  }
+  .view-jsrp-d .jd-compact-sep {
+    width: 3px; height: 3px; border-radius: 50%;
+    background: var(--content-faded);
+    opacity: 0.5;
+    flex-shrink: 0;
+    align-self: center;
+  }
+  .view-jsrp-d .jd-compact-query {
+    font: 700 15px/1.2 var(--font-brand);
+    color: var(--content-inverse-base);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+  }
+
+  .view-jsrp-d .jd-compact-spacer { flex: 1; min-width: 24px; }
+
+  .view-jsrp-d .jd-compact-ctas {
+    flex-shrink: 0;
+    display: inline-flex;
+    gap: 8px;
+  }
+  /* Compact-bar pills — translucent white on dark surface */
+  .view-jsrp-d .jd-compact-ctas .jd-sort-btn,
+  .view-jsrp-d .jd-compact-ctas .jd-filter-btn {
+    height: 34px;
+    padding: 0 14px;
+    font: 600 12.5px/1 var(--font-brand);
+    background: rgba(255,255,255,0.06);
+    border: var(--stroke-thin) solid rgba(255,255,255,0.14);
+    color: var(--content-inverse-base);
+    transition: all 160ms ease;
+  }
+  .view-jsrp-d .jd-compact-ctas .jd-sort-btn:hover,
+  .view-jsrp-d .jd-compact-ctas .jd-filter-btn:hover {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.30);
+  }
+  .view-jsrp-d .jd-compact-ctas .jd-sort-btn:active,
+  .view-jsrp-d .jd-compact-ctas .jd-filter-btn:active {
+    transform: scale(0.98);
+  }
+  .view-jsrp-d .jd-compact-ctas .jd-sort-btn b {
+    color: var(--content-inverse-base);
+    font-weight: 700;
+  }
+  .view-jsrp-d .jd-compact-ctas .jd-sort-btn .sort-label {
+    color: var(--content-inverse-faded);
+    font-weight: 500;
+  }
+  .view-jsrp-d .jd-compact-ctas .jd-filter-btn .badge {
+    background: var(--content-inverse-base);
+    color: var(--content-base);
+  }
+
+  /* ── Row 2: companies pills (glass A3 style) ──
+     Translucent glass nav arrows and rounded pill chips. Active
+     chip uses a brand-blue gradient fill with a soft shadow.
+     Avatars are hidden in this compact context for density. */
+  .view-jsrp-d .jd-compact-companies {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 12px 24px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  /* Dark-surface nav arrows */
+  .view-jsrp-d .jd-companies-nav--dark {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: var(--stroke-thin) solid rgba(255,255,255,0.14);
+    color: var(--content-inverse-muted);
+    transition: all 140ms ease;
+  }
+  .view-jsrp-d .jd-companies-nav--dark:hover {
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.30);
+    color: var(--content-inverse-base);
+  }
+  .view-jsrp-d .jd-companies-nav--dark svg { width: 12px; height: 12px; }
+
+  .view-jsrp-d .jd-companies-track--dark {
+    gap: 6px;
+    align-items: center;
+  }
+  /* Pill chip on dark surface — translucent white outline by default,
+     brand-gradient fill when active. Avatars hidden for density. */
+  .view-jsrp-d .jd-companies-track--dark .jd-company {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: var(--radius-full);
+    background: transparent;
+    border: var(--stroke-thin) solid rgba(255,255,255,0.14);
+    box-shadow: none;
+    transform: none;
+    color: var(--content-inverse-muted);
+    font: 600 12px/1 var(--font-brand);
+    gap: 0;
+    transition: all 160ms ease;
+  }
+  .view-jsrp-d .jd-companies-track--dark .jd-company:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.30);
+    color: var(--content-inverse-base);
+    transform: none;
+    box-shadow: none;
+  }
+  .view-jsrp-d .jd-companies-track--dark .jd-company.is-on {
+    background: linear-gradient(135deg, #1A56FF 0%, #4D7CFF 100%);
+    color: #FFFFFF;
+    border-color: transparent;
+    font-weight: 700;
+    box-shadow: 0 4px 12px -2px rgba(26,86,255,0.50);
+  }
+  /* Hide avatars in compact bar — pill chips show label only */
+  .view-jsrp-d .jd-companies-track--dark .jd-company-avatar {
+    display: none;
+  }
+  .view-jsrp-d .jd-companies-track--dark .jd-company .jd-company-label {
+    color: inherit;
+    font-size: 12px;
+  }
+  .view-jsrp-d .jd-companies-track--dark .jd-company.is-on .jd-company-label {
+    color: #FFFFFF;
+    font-weight: 700;
+  }
+
+  /* Tooltip dark-band override */
+  .view-jsrp-d .jd-dark-band .jd-hero-h-tip {
+    background: var(--surface-raised);
+    color: var(--content-base);
+  }
+  .view-jsrp-d .jd-dark-band .jd-hero-h-tip::before {
+    background: var(--surface-raised);
+  }
+
+  /* Page container — matches the 1180px / 32px-side-padding rhythm */
+  .jd-page { max-width: 1180px; margin: 0 auto; }
+
+  /* ── HERO BAND — query, count, sort label ── */
+  /* Default hero-band fallback */
+  .view-jsrp-d .jd-hero-band {
+    background: transparent;
+    padding: 0;
+  }
+  .view-jsrp-d .jd-hero-h-tip {
+    position: absolute;
+    top: calc(100% + 10px); left: 0;
+    max-width: 680px; padding: 12px 16px;
+    background: var(--content-base);
+    color: var(--content-on-fill-dark);
+    border-radius: var(--radius-lg);
+    font: 500 13.5px/1.5 var(--font-brand);
+    letter-spacing: -0.002em;
+    white-space: normal; z-index: 100;
+    opacity: 0; transform: translateY(-4px);
+    transition: opacity 140ms ease, transform 140ms ease;
+    pointer-events: none;
+    box-shadow: var(--shadow-overlay);
+  }
+  .view-jsrp-d .jd-hero-h-tip::before {
+    content: ""; position: absolute;
+    top: -5px; left: 24px;
+    width: 10px; height: 10px;
+    background: var(--content-base);
+    transform: rotate(45deg);
+    border-radius: var(--radius-xs);
+  }
+  .view-jsrp-d .jd-hero-h-tip.is-shown { opacity: 1; transform: translateY(0); }
+
+  /* ── TOOLBAR — sits inside the dark hero band ── */
+  .view-jsrp-d .jd-toolbar-band {
+    padding: 8px 32px 4px;
+  }
+  .view-jsrp-d .jd-toolbar {
+    display: flex; align-items: center;
+    justify-content: flex-end; gap: 10px;
+  }
+  .view-jsrp-d .jd-toolbar-right {
+    display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+  }
+
+  /* Controls — translucent white pills on the dark surface */
+  .view-jsrp-d .jd-sort-btn,
+  .view-jsrp-d .jd-filter-btn {
+    height: 40px; padding: 0 18px;
+    background: rgba(255,255,255,0.08);
+    border: var(--stroke-thin) solid rgba(255,255,255,0.18);
+    border-radius: var(--radius-full);
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 700 13.5px/1 var(--font-brand);
+    color: var(--content-inverse-base);
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms;
+    position: relative;
+  }
+  .view-jsrp-d .jd-sort-btn:hover,
+  .view-jsrp-d .jd-filter-btn:hover {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.30);
+  }
+  .view-jsrp-d .jd-sort-btn.is-open,
+  .view-jsrp-d .jd-filter-btn.is-open {
+    border-color: var(--content-inverse-base);
+  }
+  .view-jsrp-d .jd-sort-btn svg,
+  .view-jsrp-d .jd-filter-btn svg { width: 14px; height: 14px; }
+  .view-jsrp-d .jd-sort-btn b {
+    font-weight: 800;
+    color: var(--content-inverse-base);
+  }
+  .view-jsrp-d .jd-sort-btn .sort-label {
+    color: var(--content-inverse-faded);
+    font-weight: 600;
+  }
+  /* Filter badge — white pill with dark count on the dark control */
+  .view-jsrp-d .jd-filter-btn .badge {
+    min-width: 20px; height: 20px; padding: 0 6px;
+    background: var(--content-inverse-base);
+    color: var(--content-base);
+    border-radius: var(--radius-full);
+    font-size: 10.5px; font-weight: 800;
+    display: none; place-items: center;
+  }
+  .view-jsrp-d .jd-filter-btn .badge.show { display: grid; }
+
+  /* ── SORT POPOVER ── */
+  .view-jsrp-d .jd-sort-wrap { position: relative; display: inline-flex; }
+  .view-jsrp-d .jd-sort-pop {
+    position: absolute; top: 48px; right: 0;
+    min-width: 260px;
+    background: var(--surface-raised);
+    border: var(--stroke-thin) solid var(--stroke-muted);
+    border-radius: var(--radius-lg);
+    padding: 6px;
+    box-shadow: 0 12px 32px -10px rgba(16,24,40,0.20), 0 4px 10px -4px rgba(16,24,40,0.10);
+    opacity: 0; pointer-events: none;
+    transform: translateY(-4px);
+    transition: opacity 160ms, transform 160ms;
+    z-index: 25;
+  }
+  .view-jsrp-d .jd-sort-btn.is-open + .jd-sort-pop {
+    opacity: 1; pointer-events: auto; transform: translateY(0);
+  }
+  .view-jsrp-d .jd-sort-pop-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 12px;
+    border-radius: var(--radius-md);
+    background: transparent; border: none;
+    cursor: pointer; width: 100%;
+    text-align: left;
+    font: 700 13px/1 var(--font-brand);
+    color: var(--content-base);
+    transition: background 120ms;
+  }
+  .view-jsrp-d .jd-sort-pop-row:hover { background: var(--surface-base); }
+  .view-jsrp-d .jd-sort-pop-row .lbl { flex: 1; }
+  .view-jsrp-d .jd-sort-pop-row .check {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: var(--stroke-thick) solid var(--stroke-base);
+    flex-shrink: 0;
+    display: grid; place-items: center;
+  }
+  .view-jsrp-d .jd-sort-pop-row.active .check { border-color: var(--content-base); }
+  .view-jsrp-d .jd-sort-pop-row.active .check::after {
+    content: ""; width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--content-base);
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     JOB CARDS — Refined Editorial landscape
+     ════════════════════════════════════════════════════════════ */
+  .view-jsrp-d .jd-results { padding: 24px 32px 80px; }
+  .view-jsrp-d .jd-list { display: flex; flex-direction: column; gap: 14px; }
+
+  .view-jsrp-d .jd-jc {
+    background: var(--surface-raised);
+    border: var(--stroke-thin) solid var(--stroke-muted);
+    border-radius: 20px;
+    padding: 26px 30px;
+    display: flex; flex-direction: column; gap: 18px;
+    transition: border-color 160ms, box-shadow 160ms;
+    cursor: pointer;
+  }
+  .view-jsrp-d .jd-jc:hover {
+    border-color: rgba(13,17,23,0.16);
+    box-shadow: var(--shadow-lifted);
+  }
+
+  .view-jsrp-d .jd-jc-top { display: flex; align-items: center; gap: 14px; }
+  .view-jsrp-d .jd-jc-logo {
+    width: 42px; height: 42px;
+    border-radius: var(--radius-md);
+    display: grid; place-items: center; flex-shrink: 0;
+    font: 800 12.5px/1 var(--font-brand);
+  }
+  .view-jsrp-d .jd-jc-co-row {
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .view-jsrp-d .jd-jc-co {
+    font: 700 13.5px/1 var(--font-brand);
+    color: var(--content-base);
+  }
+  .view-jsrp-d .jd-jc-co-dot {
+    width: 3px; height: 3px; border-radius: 50%;
+    background: var(--content-faded);
+  }
+  .view-jsrp-d .jd-jc-time {
+    font-size: 12.5px; font-weight: 500;
+    color: var(--content-faded);
+  }
+  .view-jsrp-d .jd-jc-chips {
+    display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap;
+  }
+  .view-jsrp-d .jd-jc-chip {
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font: 700 11px/1.4 var(--font-brand);
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+    display: inline-flex; align-items: center;
+  }
+  .view-jsrp-d .jd-jc-chip.actively {
+    background: var(--surface-brand-subtle);
+    color: var(--surface-brand-intense);
+  }
+  .view-jsrp-d .jd-jc-chip.early {
+    background: var(--surface-pink-subtle);
+    color: var(--content-pink);
+  }
+  .view-jsrp-d .jd-jc-share {
+    width: 44px; height: 44px;
+    border-radius: 14px;
+    background: var(--surface-warm);
+    border: none;
+    display: grid; place-items: center;
+    cursor: pointer; flex-shrink: 0;
+    color: var(--content-muted);
+    transition: background 150ms ease, transform 150ms ease;
+  }
+  .view-jsrp-d .jd-jc-share:hover {
+    background: var(--surface-sunken);
+    transform: translateY(-1px);
+  }
+  .view-jsrp-d .jd-jc-share svg { width: 17px; height: 17px; }
+
+  .view-jsrp-d .jd-jc-role {
+    font: 800 24px/1.2 var(--font-brand);
+    letter-spacing: -0.02em;
+    margin: 0;
+    color: var(--content-base);
+  }
+
+  /* META row — Experience · Salary · Location.
+     Now sits ABOVE the divider as its own row (no border). */
+  .view-jsrp-d .jd-jc-meta {
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  }
+  .view-jsrp-d .jd-jc-meta-item {
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 600 13px/1 var(--font-brand);
+    color: var(--content-muted);
+  }
+  .view-jsrp-d .jd-jc-meta-item svg {
+    width: 15px; height: 15px;
+    color: var(--content-faded);
+    flex-shrink: 0;
+  }
+  .view-jsrp-d .jd-jc-meta-divider {
+    width: 3px; height: 3px; border-radius: 50%;
+    background: var(--content-faded);
+  }
+
+  /* BOTTOM row — divider + Required skills + Share/Apply */
+  .view-jsrp-d .jd-jc-bottom {
+    display: flex; align-items: center; gap: 14px;
+    padding-top: 18px;
+    border-top: var(--stroke-thin) solid var(--stroke-muted);
+    flex-wrap: wrap;
+  }
+  /* Required skills — inline text with bullet separators */
+  .view-jsrp-d .jd-jc-skills-row {
+    flex: 1; min-width: 0;
+    display: inline-flex; align-items: baseline;
+    gap: 10px; flex-wrap: wrap;
+  }
+  .view-jsrp-d .jd-jc-skills-label {
+    font: 600 12px/1 var(--font-brand);
+    color: var(--content-faded);
+    flex-shrink: 0;
+  }
+  .view-jsrp-d .jd-jc-skills-list {
+    font: 700 14px/1.4 var(--font-brand);
+    color: var(--content-base);
+    letter-spacing: -0.005em;
+    display: inline-flex; align-items: baseline; flex-wrap: wrap; gap: 0;
+  }
+  .view-jsrp-d .jd-jc-skill {
+    white-space: nowrap;
+  }
+  .view-jsrp-d .jd-jc-skill-dot {
+    color: var(--content-faded);
+    font-weight: 400;
+    margin: 0 8px;
+  }
+  .view-jsrp-d .jd-jc-apply {
+    height: 44px; padding: 0 24px;
+    background: var(--content-base);
+    color: var(--content-on-fill-dark);
+    border: none;
+    border-radius: 14px;
+    display: inline-flex; align-items: center; gap: 8px;
+    font: 700 14px/1 var(--font-brand);
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    transition: transform 150ms ease, background 150ms ease;
+    flex-shrink: 0;
+  }
+  .view-jsrp-d .jd-jc-apply:hover { transform: translateY(-1px); }
+  .view-jsrp-d .jd-jc-apply svg { width: 14px; height: 14px; }
+
+  /* ════════════════════════════════════════════════════════════
+     FILTER MODULE — Right-edge drawer + Sub-sheet (See all)
+     ════════════════════════════════════════════════════════════ */
+  /* Backdrop */
+  .view-jsrp-d .jdfm-bd {
+    position: fixed; inset: 0;
+    background: var(--surface-overlay);
+    z-index: 80;
+    opacity: 0; pointer-events: none;
+    transition: opacity 220ms ease;
+  }
+  .view-jsrp-d .jdfm-bd.show { opacity: 1; pointer-events: auto; }
+
+  /* Drawer */
+  .view-jsrp-d .jdfm {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 420px; max-width: calc(100vw - 64px);
+    background: var(--surface-raised);
+    border-radius: 0;
+    overflow: hidden;
+    z-index: 81;
+    display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 280ms cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: var(--shadow-drawer);
+    pointer-events: none;
+  }
+  .view-jsrp-d .jdfm.open {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  /* Drawer header */
+  .view-jsrp-d .jdfm-h {
+    padding: 20px 24px;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0;
+    position: relative; z-index: 2;
+    box-shadow: 0 6px 12px -8px rgba(13,17,23,0.18);
+  }
+  .view-jsrp-d .jdfm-h-title {
+    font: 800 18px/1 var(--font-brand);
+    flex: 1;
+    color: var(--content-base);
+  }
+  .view-jsrp-d .jdfm-h-close {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: var(--surface-base);
+    border: none; cursor: pointer;
+    display: grid; place-items: center;
+    transition: background 120ms;
+    color: var(--content-base);
+  }
+  .view-jsrp-d .jdfm-h-close:hover { background: var(--surface-warm); }
+  .view-jsrp-d .jdfm-h-close svg { width: 14px; height: 14px; }
+
+  /* Drawer body — stack of filter cards */
+  .view-jsrp-d .jdfm-body {
+    flex: 1; overflow-y: auto;
+    padding: 18px 18px 22px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .view-jsrp-d .jdfm-card {
+    background: var(--surface-muted);
+    border-radius: var(--radius-xl);
+    padding: 18px 20px;
+  }
+  .view-jsrp-d .jdfm-card-h {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 14px;
+  }
+  .view-jsrp-d .jdfm-card-name {
+    font: 800 14px/1 var(--font-brand);
+    color: var(--content-base);
+    flex: 1;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .view-jsrp-d .jdfm-card-count {
+    background: var(--content-base);
+    color: var(--content-on-fill-dark);
+    border-radius: var(--radius-full);
+    padding: 2px 8px;
+    font-size: 10.5px; font-weight: 800;
+    display: none;
+  }
+  .view-jsrp-d .jdfm-card.has-selection .jdfm-card-count { display: inline-block; }
+  .view-jsrp-d .jdfm-card-clear {
+    background: transparent; border: none; cursor: pointer;
+    font: 700 11.5px/1 var(--font-brand);
+    color: var(--content-faded);
+    padding: 4px 6px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(102,112,133,0.4);
+    display: none;
+  }
+  .view-jsrp-d .jdfm-card-clear:hover { color: var(--content-base); }
+  .view-jsrp-d .jdfm-card.has-selection .jdfm-card-clear { display: inline-block; }
+
+  /* Pills inside a filter card */
+  .view-jsrp-d .jdfm-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+  .view-jsrp-d .jdfm-pill {
+    height: 34px; padding: 0 14px;
+    border: var(--stroke-default) solid var(--stroke-base);
+    border-radius: var(--radius-full);
+    background: var(--surface-raised);
+    color: var(--content-base);
+    font: 700 12.5px/1 var(--font-brand);
+    cursor: pointer;
+    transition: all 140ms;
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .view-jsrp-d .jdfm-pill:hover { border-color: rgba(13,17,23,0.30); }
+  .view-jsrp-d .jdfm-pill.is-on {
+    background: var(--content-base);
+    color: var(--content-on-fill-dark);
+    border-color: var(--content-base);
+  }
+  .view-jsrp-d .jdfm-pill.is-extra { order: -1; }
+  .view-jsrp-d .jdfm-pill-count {
+    font-size: 10.5px; opacity: .6; font-weight: 600;
+  }
+  .view-jsrp-d .jdfm-pill.is-on .jdfm-pill-count { opacity: .75; }
+  .view-jsrp-d .jdfm-more {
+    margin-top: 12px; padding: 0;
+    height: 26px; background: transparent; border: none;
+    color: var(--content-base);
+    font: 800 12px/1 var(--font-brand);
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 3px;
+  }
+  .view-jsrp-d .jdfm-more::after {
+    content: "›"; font-size: 18px; line-height: .5;
+    margin-top: -4px;
+  }
+
+  /* Drawer footer */
+  .view-jsrp-d .jdfm-foot {
+    padding: 16px 20px;
+    display: flex; gap: 10px; align-items: center;
+    flex-shrink: 0;
+    position: relative; z-index: 2;
+    box-shadow: 0 -6px 12px -8px rgba(13,17,23,0.18);
+  }
+  .view-jsrp-d .jdfm-foot-clear {
+    flex: 0 0 auto;
+    height: 46px; padding: 0 22px;
+    background: transparent;
+    border: var(--stroke-default) solid var(--stroke-base);
+    border-radius: 14px;
+    font: 700 13.5px/1 var(--font-brand);
+    color: var(--content-muted);
+    cursor: pointer;
+    transition: background 120ms;
+  }
+  .view-jsrp-d .jdfm-foot-clear:hover { background: var(--surface-base); }
+  .view-jsrp-d .jdfm-foot-apply {
+    flex: 1; height: 46px;
+    background: var(--content-base);
+    border: none; border-radius: 14px;
+    font: 800 14px/1 var(--font-brand);
+    color: var(--content-on-fill-dark);
+    cursor: pointer;
+    transition: background 120ms;
+  }
+  .view-jsrp-d .jdfm-foot-apply:hover { background: var(--content-muted); }
+  .view-jsrp-d .jdfm-foot-apply b { font-weight: 800; }
+
+  /* Sub-sheet — floats to the LEFT of the drawer */
+  .view-jsrp-d .jdfm-sub-bd {
+    position: fixed; inset: 0;
+    background: rgba(13,17,23,0.45);
+    opacity: 0; pointer-events: none;
+    transition: opacity 220ms ease;
+    z-index: 82;
+  }
+  .view-jsrp-d .jdfm-sub-bd.is-shown { opacity: 1; pointer-events: auto; }
+  .view-jsrp-d .jdfm-sub {
+    position: fixed;
+    top: 24px; bottom: 24px; right: 436px;
+    width: 400px; max-width: calc(100vw - 460px);
+    background: var(--surface-raised);
+    border-radius: 18px;
+    z-index: 83;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    opacity: 0; pointer-events: none;
+    transform: translateX(20px);
+    transition: opacity 220ms ease, transform 280ms cubic-bezier(0.32, 0.72, 0, 1);
+    box-shadow: 0 24px 60px -12px rgba(13,17,23,0.30), 0 8px 20px -4px rgba(13,17,23,0.15);
+  }
+  .view-jsrp-d .jdfm-sub.is-shown {
+    opacity: 1; pointer-events: auto; transform: translateX(0);
+  }
+
+  /* Sub-sheet search input */
+  .view-jsrp-d .jdfm-search { margin: 14px 20px 8px; position: relative; }
+  .view-jsrp-d .jdfm-search input {
+    width: 100%; height: 42px;
+    border: var(--stroke-thin) solid var(--stroke-base);
+    border-radius: var(--radius-lg);
+    padding: 0 14px 0 40px;
+    font: 600 13.5px/1 var(--font-brand);
+    color: var(--content-base);
+    background: var(--surface-raised);
+  }
+  .view-jsrp-d .jdfm-search input::placeholder {
+    color: var(--content-faded); font-weight: 500;
+  }
+  .view-jsrp-d .jdfm-search input:focus {
+    outline: none; border-color: var(--content-base);
+  }
+  .view-jsrp-d .jdfm-search::before {
+    content: ""; position: absolute;
+    top: 50%; left: 14px; transform: translateY(-50%);
+    width: 15px; height: 15px;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23667085' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='8'/><path d='M21 21l-4.35-4.35'/></svg>") no-repeat center / contain;
+    pointer-events: none;
+  }
+  .view-jsrp-d .jdfm-sub-rows-wrap {
+    flex: 1; overflow-y: auto;
+    padding: 8px 0 24px;
+  }
+  .view-jsrp-d .jdfm-sub-section {
+    padding: 18px 20px 10px;
+    font: 800 11px/1 var(--font-brand);
+    text-transform: uppercase; letter-spacing: .05em;
+    color: var(--content-faded);
+  }
+  .view-jsrp-d .jdfm-sub-section:first-child { padding-top: 10px; }
+  .view-jsrp-d .jdfm-sub-row {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 20px;
+    border-radius: var(--radius-md);
+    background: transparent; border: none;
+    cursor: pointer; width: 100%;
+    text-align: left;
+    transition: background 120ms;
+  }
+  .view-jsrp-d .jdfm-sub-row:hover { background: var(--surface-base); }
+  .view-jsrp-d .jdfm-sub-row .lbl {
+    flex: 1;
+    font: 700 14px/1 var(--font-brand);
+    color: var(--content-base);
+  }
+  .view-jsrp-d .jdfm-sub-row .cnt {
+    font: 600 12px/1 var(--font-brand);
+    color: var(--content-faded);
+  }
+  .view-jsrp-d .jdfm-sub-row .ck {
+    width: 18px; height: 18px;
+    border-radius: var(--radius-sm);
+    border: var(--stroke-thick) solid var(--stroke-base);
+    flex-shrink: 0;
+    display: grid; place-items: center;
+    transition: all 120ms;
+  }
+  .view-jsrp-d .jdfm-sub-row .ck svg {
+    width: 11px; height: 11px;
+    stroke: var(--surface-raised);
+    stroke-width: 3; fill: none;
+    stroke-linecap: round; stroke-linejoin: round;
+    opacity: 0;
+    transition: opacity 120ms;
+  }
+  .view-jsrp-d .jdfm-sub-row.is-on .ck {
+    background: var(--content-base);
+    border-color: var(--content-base);
+  }
+  .view-jsrp-d .jdfm-sub-row.is-on .ck svg { opacity: 1; }
+  .view-jsrp-d .jdfm-empty {
+    padding: 32px 20px; text-align: center;
+    font: 600 13px/1 var(--font-brand);
+    color: var(--content-faded);
+  }
+  .view-jsrp-d .jdfm-sub-foot {
+    padding: 14px 20px;
+    flex-shrink: 0;
+    box-shadow: 0 -6px 12px -8px rgba(13,17,23,0.18);
+  }
+  .view-jsrp-d .jdfm-sub-done {
+    width: 100%; height: 44px;
+    background: var(--content-base);
+    border: none; border-radius: 14px;
+    font: 800 13.5px/1 var(--font-brand);
+    color: var(--content-on-fill-dark);
+    cursor: pointer;
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     TOAST — minimal feedback strip
+     ════════════════════════════════════════════════════════════ */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--content-base);
+    color: var(--content-on-fill-dark);
+    padding: 12px 20px;
+    border-radius: var(--radius-full);
+    font: 600 13px/1 var(--font-brand);
+    box-shadow: var(--shadow-overlay);
+    opacity: 0; pointer-events: none;
+    transition: opacity 200ms ease, transform 200ms ease;
+    z-index: 200;
+  }
+  .toast.show {
+    opacity: 1; transform: translateX(-50%) translateY(0);
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     FOOTER — dark surface, two-section structure
+       1. Context band: Java Developer jobs (left) + Browse jobs in (right)
+       2. Sitemap: logo + 3 link columns
+       3. Partner sites row
+       4. Bottom legal row
+     ════════════════════════════════════════════════════════════ */
+  .view-jsrp-d .site-footer {
+    background: var(--surface-inverse-base);
+    color: var(--content-inverse-base);
+    padding: 56px 32px 24px;
+    margin-top: 64px;
+  }
+  .view-jsrp-d .footer-inner {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  /* ─── 1. CONTEXT BAND: two columns ─── */
+  .view-jsrp-d .ft-context {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    padding-bottom: 40px;
+  }
+  .view-jsrp-d .ft-ctx-block h3 {
+    margin: 0 0 18px;
+    font: 700 18px/1.2 var(--font-brand);
+    color: var(--content-inverse-base);
+    letter-spacing: -0.01em;
+  }
+
+  /* Pill tabs (Delhi NCR / Bengaluru / etc.) — default variant */
+  .view-jsrp-d .ft-tabs {
+    display: inline-flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 22px;
+  }
+  .view-jsrp-d .ft-tab {
+    height: 32px; padding: 0 14px;
+    background: transparent;
+    border: var(--stroke-thin) solid rgba(255,255,255,0.14);
+    border-radius: var(--radius-full);
+    font: 600 12px/1 var(--font-brand);
+    color: var(--content-inverse-muted);
+    cursor: pointer;
+    transition: all 140ms ease;
+  }
+  .view-jsrp-d .ft-tab:hover {
+    background: rgba(255,255,255,0.06);
+    color: var(--content-inverse-base);
+  }
+  .view-jsrp-d .ft-tab.is-on {
+    background: var(--surface-raised);
+    color: var(--content-base);
+    border-color: var(--surface-raised);
+    font-weight: 700;
+  }
+
+  /* Segmented-control variant (Tech / BPO / BFSI / Sales) */
+  .view-jsrp-d .ft-tabs--segmented {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    gap: 0;
+    padding: 3px;
+    background: rgba(255,255,255,0.04);
+    border: var(--stroke-thin) solid rgba(255,255,255,0.10);
+    border-radius: var(--radius-full);
+  }
+  .view-jsrp-d .ft-tabs--segmented .ft-tab {
+    background: transparent;
+    border: none;
+    height: 28px;
+    padding: 0 18px;
+  }
+  .view-jsrp-d .ft-tabs--segmented .ft-tab:hover {
+    background: rgba(255,255,255,0.04);
+    color: var(--content-inverse-base);
+  }
+  .view-jsrp-d .ft-tabs--segmented .ft-tab.is-on {
+    background: var(--surface-raised);
+    color: var(--content-base);
+    border: none;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.20);
+  }
+
+  /* Link list with arrow — compact rows */
+  .view-jsrp-d .ft-list { display: none; }
+  .view-jsrp-d .ft-list.is-on { display: block; }
+  .view-jsrp-d .ft-list a {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 11px 0;
+    color: var(--content-inverse-base);
+    text-decoration: none;
+    font: 500 12.5px/1 var(--font-brand);
+    border-bottom: var(--stroke-thin) solid rgba(255,255,255,0.08);
+    transition: color 140ms ease, padding 140ms ease;
+  }
+  .view-jsrp-d .ft-list a:hover {
+    color: var(--content-inverse-brand);
+    padding-left: 4px;
+  }
+  .view-jsrp-d .ft-list a:last-child { border-bottom: none; }
+  .view-jsrp-d .ft-list a .arr {
+    color: var(--content-inverse-muted);
+    transition: transform 140ms ease, color 140ms ease;
+  }
+  .view-jsrp-d .ft-list a:hover .arr {
+    color: var(--content-inverse-brand);
+    transform: translateX(4px);
+  }
+  .view-jsrp-d .ft-list a .arr svg { width: 14px; height: 14px; }
+
+  /* "View all" — compact inline link with chevron */
+  .view-jsrp-d .ft-view-all {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin-top: 18px;
+    color: var(--content-inverse-brand);
+    font: 700 12.5px/1 var(--font-brand);
+    text-decoration: none;
+    padding: 2px 0;
+    transition: gap 140ms ease, color 140ms ease;
+    border: none;
+    background: transparent;
+  }
+  .view-jsrp-d .ft-view-all:hover {
+    gap: 10px;
+    color: var(--content-inverse-base);
+  }
+  .view-jsrp-d .ft-view-all .arr {
+    display: inline-flex;
+    color: inherit;
+  }
+  .view-jsrp-d .ft-view-all svg { width: 14px; height: 14px; }
+
+  /* ─── 2. SITEMAP: logo + 3 link cols ─── */
+  .view-jsrp-d .ft-sitemap {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    gap: 40px;
+    padding: 40px 0 32px;
+    border-top: var(--stroke-thin) solid rgba(255,255,255,0.08);
+  }
+  .view-jsrp-d .ft-brand-block { max-width: 320px; }
+  .view-jsrp-d .ft-brand-mark { display: inline-block; line-height: 0; margin-bottom: 16px; }
+  .view-jsrp-d .ft-brand-mark svg {
+    width: 56px; height: auto;
+  }
+  .view-jsrp-d .ft-brand-block p {
+    margin: 0 0 20px;
+    font: 500 12.5px/1.55 var(--font-brand);
+    color: var(--content-inverse-muted);
+  }
+  .view-jsrp-d .ft-socials {
+    display: inline-flex; gap: 8px;
+  }
+  .view-jsrp-d .ft-socials a {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+    border: var(--stroke-thin) solid rgba(255,255,255,0.10);
+    display: grid; place-items: center;
+    color: var(--content-inverse-base);
+    text-decoration: none;
+    transition: all 140ms ease;
+    font: 700 10.5px/1 var(--font-brand);
+  }
+  .view-jsrp-d .ft-socials a:hover {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.24);
+    transform: translateY(-1px);
+  }
+
+  .view-jsrp-d .ft-col h5 {
+    margin: 0 0 14px;
+    font: 700 11px/1 var(--font-brand);
+    color: var(--content-inverse-base);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .view-jsrp-d .ft-col ul {
+    margin: 0; padding: 0; list-style: none;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .view-jsrp-d .ft-col a {
+    color: var(--content-inverse-muted);
+    text-decoration: none;
+    font: 500 12.5px/1 var(--font-brand);
+    transition: color 140ms ease;
+  }
+  .view-jsrp-d .ft-col a:hover { color: var(--content-inverse-base); }
+
+  /* ─── 3. PARTNER SITES ─── */
+  .view-jsrp-d .ft-partners {
+    padding: 22px 0;
+    border-top: var(--stroke-thin) solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+  }
+  .view-jsrp-d .ft-partners-label {
+    font: 700 10.5px/1 var(--font-brand);
+    color: var(--content-inverse-faded);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .view-jsrp-d .ft-partner-row {
+    display: inline-flex; gap: 8px; flex-wrap: wrap;
+  }
+  .view-jsrp-d .ft-partner {
+    height: 28px; padding: 0 12px;
+    border-radius: var(--radius-md);
+    background: rgba(255,255,255,0.06);
+    border: var(--stroke-thin) solid rgba(255,255,255,0.10);
+    display: inline-flex; align-items: center;
+    font: 800 12px/1 var(--font-brand);
+    text-decoration: none;
+    transition: all 140ms ease;
+  }
+  .view-jsrp-d .ft-partner:hover {
+    background: rgba(255,255,255,0.10);
+    transform: translateY(-1px);
+  }
+  /* Partner brand colors (publisher brand hex — kept as-is, these
+     are the partners' identity, not Shine's design system) */
+  .view-jsrp-d .ft-partner.p-mint    { color: #00B4D8; }
+  .view-jsrp-d .ft-partner.p-patrika { color: #E31B8F; }
+  .view-jsrp-d .ft-partner.p-ottplay { color: #F79009; }
+  .view-jsrp-d .ft-partner.p-indic   { color: #1A56FF; }
+  .view-jsrp-d .ft-partner.p-ht      { color: #F87171; }
+  .view-jsrp-d .ft-partner.p-desi    { color: #9276FA; }
+
+  /* ─── 4. BOTTOM LEGAL ─── */
+  .view-jsrp-d .ft-bottom {
+    padding: 18px 0 0;
+    border-top: var(--stroke-thin) solid rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 20px; flex-wrap: wrap;
+  }
+  .view-jsrp-d .ft-copy {
+    font: 500 12px/1 var(--font-brand);
+    color: var(--content-inverse-faded);
+  }
+  .view-jsrp-d .ft-legal {
+    display: inline-flex; gap: 20px;
+  }
+  .view-jsrp-d .ft-legal a {
+    color: var(--content-inverse-muted);
+    text-decoration: none;
+    font: 500 12px/1 var(--font-brand);
+    transition: color 140ms ease;
+  }
+  .view-jsrp-d .ft-legal a:hover { color: var(--content-inverse-base); }
+
+  /* ════════════════════════════════════════════════════════════
+     RELEVANCE FEEDBACK WIDGET (floating, bottom-right)
+     Always-expanded compact card with two thumb buttons. Appears
+     once the 6th job card scrolls into view; can be dismissed via
+     close icon or by voting. Session-persisted so it doesn't
+     reappear after the user has answered or dismissed it.
+     ════════════════════════════════════════════════════════════ */
+  .jd-fb {
+    position: fixed;
+    bottom: 48px;
+    right: 48px;
+    z-index: 100;
+    background: var(--surface-inverse-base);
+    color: var(--content-inverse-base);
+    border: var(--stroke-thin) solid rgba(255,255,255,0.10);
+    border-radius: var(--radius-xl);
+    padding: 16px 18px 16px 16px;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.06),
+      0 18px 40px -14px rgba(0,0,0,0.50),
+      0 6px 14px -3px rgba(13,17,23,0.20);
+    display: flex; align-items: center; gap: 14px;
+    max-width: 360px;
+    overflow: hidden;
+    transform: translateY(40px) scale(0.92);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 360ms cubic-bezier(0.32, 0.72, 0, 1),
+                opacity 280ms ease,
+                background 240ms ease, border-color 240ms ease;
+  }
+  .jd-fb.show {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Soft brand glow inside the card */
+  .jd-fb::before {
+    content: ""; position: absolute;
+    top: -40px; right: -20px;
+    width: 160px; height: 160px;
+    background: radial-gradient(circle, rgba(126,163,255,0.30) 0%, transparent 60%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+  .jd-fb > * { position: relative; z-index: 1; }
+
+  .jd-fb-text {
+    flex: 1; min-width: 0;
+    padding-right: 4px;
+  }
+  .jd-fb-eyebrow {
+    font: 700 10px/1 var(--font-brand);
+    color: var(--content-inverse-brand);
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .jd-fb-h {
+    font: 700 13.5px/1.3 var(--font-brand);
+    color: var(--content-inverse-base);
+    letter-spacing: -0.005em;
+    white-space: nowrap;
+  }
+
+  .jd-fb-thumbs {
+    display: inline-flex; gap: 6px;
+    flex-shrink: 0;
+  }
+  .jd-fb-thumb {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: var(--stroke-default) solid rgba(255,255,255,0.14);
+    color: var(--content-inverse-base);
+    cursor: pointer;
+    display: grid; place-items: center;
+    font-size: 18px;
+    transition: all 140ms ease;
+  }
+  .jd-fb-thumb:hover {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.32);
+    transform: translateY(-2px);
+  }
+
+  .jd-fb-close {
+    position: absolute;
+    top: 6px; right: 6px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.40);
+    cursor: pointer;
+    display: grid; place-items: center;
+    z-index: 2;
+    transition: color 120ms ease;
+  }
+  .jd-fb-close:hover { color: var(--content-inverse-base); }
+  .jd-fb-close svg { width: 11px; height: 11px; }
+
+  /* Thanks state */
+  .jd-fb.is-thanks {
+    background: #027A48;
+    border-color: transparent;
+    padding: 16px 22px;
+  }
+  .jd-fb.is-thanks::before { display: none; }
+  .jd-fb.is-thanks .jd-fb-eyebrow,
+  .jd-fb.is-thanks .jd-fb-thumbs,
+  .jd-fb.is-thanks .jd-fb-close { display: none; }
+  .jd-fb.is-thanks .jd-fb-h {
+    display: inline-flex; align-items: center; gap: 10px;
+    color: #FFFFFF;
+  }
+</style>
+</head>
+<body>
+
+  <!-- COHORTS GRID APP -->
+  <div id="cohortApp" style="max-width:1100px;margin:24px auto;padding:16px;color:#F9FAFB;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0D0D0D"></div>
+
+  <!-- ==================== JSRP (logged-out search results) ==================== -->
+  <div class="view-jsrp-d" id="viewJsrp">
+
+    <!-- ──────────────── DARK HERO BAND ────────────────
+         Standard scroll-then-compact pattern (used by LinkedIn,
+         Indeed, Stripe, etc.):
+           1. .jd-dark-band  — full hero, normal block, scrolls away
+           2. .jd-compact-bar — slim sticky bar, hidden by default,
+                slides down into view from above once the hero has
+                scrolled past.
+         This avoids any height interpolation on the sticky element
+         (which would leave a gap in the document) and any stacked
+         layouts (which clip when the parent shrinks). -->
+    <div class="jd-dark-band" id="jdDarkBand">
+      <div class="jd-hero-inner">
+        <!-- Shine logo -->
+        <a href="#" class="jd-hero-logo" aria-label="Shine.com" onclick="event.preventDefault();">
+          <svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M38.8164 104.079C43.392 104.079 47.3954 105.167 50.8271 107.341C54.3162 109.458 56.7761 112.462 58.2061 116.353L48.6826 120.815C47.9963 118.87 46.7375 117.325 44.9072 116.181C43.1343 114.979 41.104 114.378 38.8164 114.378C37.1577 114.378 35.8415 114.722 34.8691 115.408C33.9542 116.095 33.4972 117.039 33.4971 118.24C33.4971 118.87 33.6685 119.442 34.0117 119.957C34.3549 120.472 34.8981 120.93 35.6416 121.33C36.4424 121.731 37.4147 122.103 38.5586 122.446L46.0225 124.678C49.9118 125.822 52.8862 127.567 54.9453 129.913C57.0043 132.202 58.0341 135.034 58.0342 138.409C58.0342 141.327 57.262 143.874 55.7178 146.048C54.2307 148.222 52.1431 149.939 49.4551 151.197C46.7669 152.399 43.5922 153 39.9316 153C34.7841 153 30.294 151.798 26.4619 149.396C22.6869 146.935 20.113 143.645 18.7402 139.525L28.1777 135.062C29.3788 137.58 31.0085 139.554 33.0674 140.984C35.1265 142.415 37.415 143.13 39.9316 143.13C41.7618 143.13 43.1634 142.758 44.1357 142.015C45.108 141.271 45.5937 140.241 45.5938 138.925C45.5938 138.238 45.4223 137.666 45.0791 137.208C44.736 136.693 44.2213 136.235 43.5352 135.835C42.8488 135.434 41.9905 135.091 40.9609 134.805L32.9824 132.573C29.1503 131.486 26.2046 129.741 24.1455 127.338C22.0865 124.878 21.0567 121.988 21.0566 118.67C21.0566 115.752 21.8 113.206 23.2871 111.031C24.7742 108.857 26.8617 107.169 29.5498 105.968C32.2381 104.709 35.3274 104.079 38.8164 104.079Z" fill="white"/>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M201.976 104.079C205.693 104.079 208.982 104.68 211.842 105.882C214.702 107.026 217.104 108.656 219.049 110.773C221.051 112.89 222.566 115.351 223.596 118.154C224.625 120.901 225.14 123.905 225.14 127.166C225.14 128.081 225.083 128.998 224.969 129.913C224.912 130.771 224.768 131.515 224.539 132.145H191.731C191.885 133.344 192.181 134.459 192.623 135.491C193.481 137.494 194.797 139.068 196.57 140.212C198.343 141.299 200.488 141.843 203.005 141.843C205.293 141.843 207.237 141.385 208.839 140.47C210.497 139.554 211.784 138.295 212.699 136.693L222.995 141.585C222.08 143.874 220.621 145.876 218.619 147.593C216.674 149.309 214.358 150.654 211.67 151.627C208.982 152.542 206.036 153 202.833 153C197.857 153 193.539 151.913 189.878 149.738C186.217 147.507 183.386 144.532 181.384 140.812C179.382 137.094 178.381 132.974 178.381 128.454C178.381 123.762 179.411 119.585 181.47 115.923C183.586 112.261 186.418 109.372 189.964 107.255C193.51 105.138 197.514 104.079 201.976 104.079ZM201.976 114.378C199.745 114.378 197.828 114.922 196.227 116.009C194.625 117.096 193.424 118.698 192.623 120.815C192.399 121.409 192.214 122.038 192.066 122.703H211.505C211.431 121.983 211.287 121.296 211.069 120.644C210.44 118.698 209.325 117.182 207.724 116.095C206.179 114.95 204.263 114.378 201.976 114.378Z" fill="white"/>
+            <path d="M75.6787 109.418C76.6593 108.043 77.8885 106.949 79.3682 106.139C81.8276 104.765 84.688 104.079 87.9482 104.079C91.4943 104.079 94.5829 104.823 97.2139 106.311C99.9021 107.798 101.989 109.887 103.477 112.576C104.964 115.208 105.708 118.298 105.708 121.846V151.97H92.8379V124.592C92.8379 122.761 92.4662 121.187 91.7227 119.871C91.0363 118.555 90.0352 117.525 88.7197 116.781C87.4615 116.038 85.9745 115.666 84.2588 115.666C82.6001 115.666 81.1124 116.037 79.7969 116.781C78.4815 117.525 77.4525 118.555 76.709 119.871C76.0226 121.187 75.6787 122.761 75.6787 124.592V151.97H62.8096V87H75.6787V109.418Z" fill="white"/>
+            <path d="M124.123 151.97H111.254V105.109H124.123V151.97Z" fill="white"/>
+            <path d="M155.763 104.079C159.309 104.079 162.397 104.823 165.028 106.311C167.717 107.798 169.805 109.887 171.292 112.576C172.779 115.208 173.522 118.298 173.522 121.846V151.97H160.653V124.592C160.653 122.761 160.282 121.187 159.538 119.871C158.852 118.555 157.851 117.525 156.535 116.781C155.277 116.037 153.789 115.666 152.073 115.666C150.415 115.666 148.928 116.038 147.612 116.781C146.297 117.525 145.267 118.555 144.523 119.871C143.837 121.187 143.494 122.761 143.494 124.592V151.97H130.625V105.109H142.636V110.811C143.719 108.764 145.235 107.206 147.184 106.139C149.643 104.766 152.503 104.079 155.763 104.079Z" fill="white"/>
+            <path d="M117.353 88C120.936 88.0002 123.84 90.8936 123.84 94.4883C123.84 98.0791 120.936 100.972 117.353 100.973C113.767 100.973 110.867 98.0793 110.867 94.4883C110.867 90.8934 113.767 88 117.353 88Z" fill="white"/>
+            <path d="M111.367 38C151.563 38 186.076 62.3239 200.993 97.0547C196.523 97.1799 192.397 98.1007 188.614 99.8174C174.186 68.2516 142.335 46.3175 105.36 46.3174C61.9889 46.3174 25.6667 76.4962 16.2451 117H15.6201C24.2635 71.9991 63.8449 38 111.367 38Z" fill="#FACA22"/>
+            <path d="M119.367 27C167.02 27 207.291 58.5937 220.382 101.977C218.896 101.024 217.289 100.2 215.559 99.5078C212.244 98.1144 208.508 97.3131 204.352 97.0996C189.475 61.2298 154.118 36 112.867 36C64.338 36 23.9658 70.918 15.501 117H15C22.497 66.0825 66.3669 27 119.367 27Z" fill="#1A56FF"/>
+          </svg>
+        </a>
+
+        <h1 class="jd-hero-h">
+          Software Developer Job<br>in <span class="accent" id="jdHeroQuery">Bengaluru</span>
+        </h1>
+
+        <!-- Eyebrow — dot + "1200 Jobs Found", sits below the title -->
+        <div class="jd-hero-eyebrow">
+          <span class="jd-hero-eyebrow-dot" aria-hidden="true"></span>
+          <span class="jd-hero-eyebrow-text">
+            <b id="jdHeroCount">1200</b> Jobs Found
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- (Companies + Sort/Filter row was previously here as a
+         standalone band; it now lives INSIDE .jd-results below so
+         it sits inside the 1180px container above the job cards
+         with no white strip between the dark hero and the cards.
+         Block kept here temporarily — see immediate move below.) -->
+    <div class="jd-controls-row" id="jdSubnav">
+      <div class="jd-subnav-inner">
+        <div class="jd-companies">
+          <button class="jd-companies-nav" data-dir="-1" data-target="jdCompaniesTrack" aria-label="Previous companies" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <div class="jd-companies-track" id="jdCompaniesTrack">
+            <!-- All Companies — text-only pill (no avatar) -->
+            <button class="jd-company jd-company--all is-on" data-company="all" type="button">
+              <span class="jd-company-label">All Companies</span>
+            </button>
+
+            <!-- Avatar pills — colored circle (initials) + name -->
+            <button class="jd-company" data-company="tcs" type="button">
+              <span class="jd-company-avatar av-tcs">T</span>
+              <span class="jd-company-label">TCS</span>
+            </button>
+            <button class="jd-company" data-company="hdfc" type="button">
+              <span class="jd-company-avatar av-hdfc">H</span>
+              <span class="jd-company-label">HDFC Bank</span>
+            </button>
+            <button class="jd-company" data-company="icici" type="button">
+              <span class="jd-company-avatar av-icici">I</span>
+              <span class="jd-company-label">ICICI Bank</span>
+            </button>
+            <button class="jd-company" data-company="infosys" type="button">
+              <span class="jd-company-avatar av-infosys">In</span>
+              <span class="jd-company-label">Infosys</span>
+            </button>
+            <button class="jd-company" data-company="accenture" type="button">
+              <span class="jd-company-avatar av-acn">A</span>
+              <span class="jd-company-label">Accenture</span>
+            </button>
+            <button class="jd-company" data-company="capgemini" type="button">
+              <span class="jd-company-avatar av-cg">C</span>
+              <span class="jd-company-label">Capgemini</span>
+            </button>
+            <button class="jd-company" data-company="stripe" type="button">
+              <span class="jd-company-avatar av-stripe">S</span>
+              <span class="jd-company-label">Stripe</span>
+            </button>
+            <button class="jd-company" data-company="google" type="button">
+              <span class="jd-company-avatar av-google">G</span>
+              <span class="jd-company-label">Google</span>
+            </button>
+          </div>
+          <button class="jd-companies-nav" data-dir="1" data-target="jdCompaniesTrack" aria-label="Next companies" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <!-- Sort + Filter (canonical handlers) -->
+        <div class="jd-subnav-ctas">
+          <div class="jd-sort-wrap">
+            <button class="jd-sort-btn" id="jdSortBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+              <span class="sort-label">Sort:</span>
+              <b id="jdSortBtnLabel">Relevance</b>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="jd-sort-pop" id="jdSortPop">
+              <button class="jd-sort-pop-row active" data-sort="relevance" type="button"><span class="lbl">Relevance · best match</span><span class="check"></span></button>
+              <button class="jd-sort-pop-row" data-sort="recent" type="button"><span class="lbl">Most recent</span><span class="check"></span></button>
+              <button class="jd-sort-pop-row" data-sort="payHigh" type="button"><span class="lbl">Salary · high to low</span><span class="check"></span></button>
+              <button class="jd-sort-pop-row" data-sort="payLow" type="button"><span class="lbl">Salary · low to high</span><span class="check"></span></button>
+              <button class="jd-sort-pop-row" data-sort="expLow" type="button"><span class="lbl">Experience · low to high</span><span class="check"></span></button>
+            </div>
+          </div>
+          <button class="jd-filter-btn" id="jdFilterBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <span>Filter</span>
+            <span class="badge" id="jdFilterBadge">0</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compact sticky bar — slides DOWN into view from above as
+         the user scrolls past the hero. position:sticky; top:0
+         pins it once the hero scrolls off. Initially hidden via
+         translateY(-100%) + opacity; .is-revealed flips it in. -->
+    <div class="jd-compact-bar" id="jdCompactBar" aria-hidden="true">
+      <!-- Row 1: brand cluster (logo + divider + query + subtle count pill) · spacer · Sort/Filter -->
+      <div class="jd-compact-bar-inner">
+        <div class="jd-compact-cluster">
+          <a href="#" class="jd-compact-logo" aria-label="Shine.com" onclick="event.preventDefault();">
+            <svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M38.8164 104.079C43.392 104.079 47.3954 105.167 50.8271 107.341C54.3162 109.458 56.7761 112.462 58.2061 116.353L48.6826 120.815C47.9963 118.87 46.7375 117.325 44.9072 116.181C43.1343 114.979 41.104 114.378 38.8164 114.378C37.1577 114.378 35.8415 114.722 34.8691 115.408C33.9542 116.095 33.4972 117.039 33.4971 118.24C33.4971 118.87 33.6685 119.442 34.0117 119.957C34.3549 120.472 34.8981 120.93 35.6416 121.33C36.4424 121.731 37.4147 122.103 38.5586 122.446L46.0225 124.678C49.9118 125.822 52.8862 127.567 54.9453 129.913C57.0043 132.202 58.0341 135.034 58.0342 138.409C58.0342 141.327 57.262 143.874 55.7178 146.048C54.2307 148.222 52.1431 149.939 49.4551 151.197C46.7669 152.399 43.5922 153 39.9316 153C34.7841 153 30.294 151.798 26.4619 149.396C22.6869 146.935 20.113 143.645 18.7402 139.525L28.1777 135.062C29.3788 137.58 31.0085 139.554 33.0674 140.984C35.1265 142.415 37.415 143.13 39.9316 143.13C41.7618 143.13 43.1634 142.758 44.1357 142.015C45.108 141.271 45.5937 140.241 45.5938 138.925C45.5938 138.238 45.4223 137.666 45.0791 137.208C44.736 136.693 44.2213 136.235 43.5352 135.835C42.8488 135.434 41.9905 135.091 40.9609 134.805L32.9824 132.573C29.1503 131.486 26.2046 129.741 24.1455 127.338C22.0865 124.878 21.0567 121.988 21.0566 118.67C21.0566 115.752 21.8 113.206 23.2871 111.031C24.7742 108.857 26.8617 107.169 29.5498 105.968C32.2381 104.709 35.3274 104.079 38.8164 104.079Z" fill="white"/>
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M201.976 104.079C205.693 104.079 208.982 104.68 211.842 105.882C214.702 107.026 217.104 108.656 219.049 110.773C221.051 112.89 222.566 115.351 223.596 118.154C224.625 120.901 225.14 123.905 225.14 127.166C225.14 128.081 225.083 128.998 224.969 129.913C224.912 130.771 224.768 131.515 224.539 132.145H191.731C191.885 133.344 192.181 134.459 192.623 135.491C193.481 137.494 194.797 139.068 196.57 140.212C198.343 141.299 200.488 141.843 203.005 141.843C205.293 141.843 207.237 141.385 208.839 140.47C210.497 139.554 211.784 138.295 212.699 136.693L222.995 141.585C222.08 143.874 220.621 145.876 218.619 147.593C216.674 149.309 214.358 150.654 211.67 151.627C208.982 152.542 206.036 153 202.833 153C197.857 153 193.539 151.913 189.878 149.738C186.217 147.507 183.386 144.532 181.384 140.812C179.382 137.094 178.381 132.974 178.381 128.454C178.381 123.762 179.411 119.585 181.47 115.923C183.586 112.261 186.418 109.372 189.964 107.255C193.51 105.138 197.514 104.079 201.976 104.079ZM201.976 114.378C199.745 114.378 197.828 114.922 196.227 116.009C194.625 117.096 193.424 118.698 192.623 120.815C192.399 121.409 192.214 122.038 192.066 122.703H211.505C211.431 121.983 211.287 121.296 211.069 120.644C210.44 118.698 209.325 117.182 207.724 116.095C206.179 114.95 204.263 114.378 201.976 114.378Z" fill="white"/>
+              <path d="M75.6787 109.418C76.6593 108.043 77.8885 106.949 79.3682 106.139C81.8276 104.765 84.688 104.079 87.9482 104.079C91.4943 104.079 94.5829 104.823 97.2139 106.311C99.9021 107.798 101.989 109.887 103.477 112.576C104.964 115.208 105.708 118.298 105.708 121.846V151.97H92.8379V124.592C92.8379 122.761 92.4662 121.187 91.7227 119.871C91.0363 118.555 90.0352 117.525 88.7197 116.781C87.4615 116.038 85.9745 115.666 84.2588 115.666C82.6001 115.666 81.1124 116.037 79.7969 116.781C78.4815 117.525 77.4525 118.555 76.709 119.871C76.0226 121.187 75.6787 122.761 75.6787 124.592V151.97H62.8096V87H75.6787V109.418Z" fill="white"/>
+              <path d="M124.123 151.97H111.254V105.109H124.123V151.97Z" fill="white"/>
+              <path d="M155.763 104.079C159.309 104.079 162.397 104.823 165.028 106.311C167.717 107.798 169.805 109.887 171.292 112.576C172.779 115.208 173.522 118.298 173.522 121.846V151.97H160.653V124.592C160.653 122.761 160.282 121.187 159.538 119.871C158.852 118.555 157.851 117.525 156.535 116.781C155.277 116.037 153.789 115.666 152.073 115.666C150.415 115.666 148.928 116.038 147.612 116.781C146.297 117.525 145.267 118.555 144.523 119.871C143.837 121.187 143.494 122.761 143.494 124.592V151.97H130.625V105.109H142.636V110.811C143.719 108.764 145.235 107.206 147.184 106.139C149.643 104.766 152.503 104.079 155.763 104.079Z" fill="white"/>
+              <path d="M117.353 88C120.936 88.0002 123.84 90.8936 123.84 94.4883C123.84 98.0791 120.936 100.972 117.353 100.973C113.767 100.973 110.867 98.0793 110.867 94.4883C110.867 90.8934 113.767 88 117.353 88Z" fill="white"/>
+              <path d="M111.367 38C151.563 38 186.076 62.3239 200.993 97.0547C196.523 97.1799 192.397 98.1007 188.614 99.8174C174.186 68.2516 142.335 46.3175 105.36 46.3174C61.9889 46.3174 25.6667 76.4962 16.2451 117H15.6201C24.2635 71.9991 63.8449 38 111.367 38Z" fill="#FACA22"/>
+              <path d="M119.367 27C167.02 27 207.291 58.5937 220.382 101.977C218.896 101.024 217.289 100.2 215.559 99.5078C212.244 98.1144 208.508 97.3131 204.352 97.0996C189.475 61.2298 154.118 36 112.867 36C64.338 36 23.9658 70.918 15.501 117H15C22.497 66.0825 66.3669 27 119.367 27Z" fill="#1A56FF"/>
+            </svg>
+          </a>
+
+          <span class="jd-compact-vdiv" aria-hidden="true"></span>
+
+          <h2 class="jd-compact-h">
+            <span class="jd-compact-query">Software Developer Job in Bengaluru</span>
+            <span class="jd-compact-count-pill" aria-label="1,200 jobs">
+              <span class="jd-compact-count-pill-dot" aria-hidden="true"></span>
+              <span class="jd-compact-count" id="jdHeroCountCompact">1,200</span>
+              <span class="jd-compact-count-suffix">jobs</span>
+            </span>
+          </h2>
+        </div>
+
+        <span class="jd-compact-spacer" aria-hidden="true"></span>
+
+        <div class="jd-compact-ctas">
+          <button class="jd-sort-btn" data-proxy="jdSortBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M6 12h12M10 18h4"/></svg>
+            <span class="sort-label">Sort:</span>
+            <b><span id="jdSortBtnLabelCompact">Relevance</span></b>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <button class="jd-filter-btn" data-proxy="jdFilterBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            <span>Filter</span>
+            <span class="badge" data-proxy-badge="jdFilterBadge">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Row 2: companies tabs (brand-underline active) — mirror of subnav -->
+      <div class="jd-compact-companies">
+        <button class="jd-companies-nav jd-companies-nav--dark" data-dir="-1" data-target="jdCompactCompaniesTrack" aria-label="Previous companies" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="jd-companies-track jd-companies-track--dark" id="jdCompactCompaniesTrack">
+          <!-- Populated by JS — mirror of the cream subnav chips. -->
+        </div>
+        <button class="jd-companies-nav jd-companies-nav--dark" data-dir="1" data-target="jdCompactCompaniesTrack" aria-label="Next companies" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    </div>
+    <!-- ──────────────── /DARK HERO BAND ──────────────── -->
+
+    <!-- Job cards grid -->
+    <section class="jd-results">
+      <div class="jd-page">
+        <div class="jd-list" id="jdList"></div>
+      </div>
+    </section>
+
+    <!-- ==================== FILTER MODULE ==================== -->
+    <!-- Drawer + Sub-sheet (kept as siblings of the drawer) -->
+    <div class="jdfm-bd" id="jdfmBd"></div>
+    <div class="jdfm" id="jdfm" role="dialog" aria-label="Filter Jobs">
+      <div class="jdfm-h">
+        <span class="jdfm-h-title">Filter Jobs</span>
+        <button class="jdfm-h-close" id="jdfmClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="jdfm-body" id="jdfmBody"></div>
+      <div class="jdfm-foot">
+        <button class="jdfm-foot-clear" id="jdfmClearBtn">Clear</button>
+        <button class="jdfm-foot-apply" id="jdfmApply">
+          <span>Show <b id="jdfmJobs">28,969</b> jobs</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="jdfm-sub-bd" id="jdfmSubBd"></div>
+    <div class="jdfm-sub" id="jdfmSub">
+      <div class="jdfm-h">
+        <span class="jdfm-h-title" id="jdfmSubTitle">Department</span>
+        <button class="jdfm-h-close" id="jdfmSubClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="jdfm-search" id="jdfmSubSearchWrap" style="display:none;">
+        <input type="text" id="jdfmSubSearch" placeholder="Search…" />
+      </div>
+      <div class="jdfm-sub-rows-wrap" id="jdfmSubRows"></div>
+      <div class="jdfm-sub-foot">
+        <button class="jdfm-sub-done" id="jdfmSubDone">Done</button>
+      </div>
+    </div>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="site-footer">
+      <div class="footer-inner">
+
+        <!-- ───── 1. Context band ───── -->
+        <div class="ft-context">
+          <!-- LEFT: Java Developer jobs by city -->
+          <div class="ft-ctx-block">
+            <h3>Jobs in top cities</h3>
+            <div class="ft-tabs" data-tabs="city">
+              <button class="ft-tab is-on" data-tab="delhi" type="button">Delhi NCR</button>
+              <button class="ft-tab" data-tab="bengaluru" type="button">Bengaluru</button>
+              <button class="ft-tab" data-tab="mumbai" type="button">Mumbai</button>
+              <button class="ft-tab" data-tab="chennai" type="button">Chennai</button>
+            </div>
+            <div class="ft-list is-on" data-list="delhi">
+              <a href="#"><span>Jobs in Delhi</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Jobs in Gurgaon</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Jobs in Noida</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Jobs in Faridabad</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+            </div>
+            <div class="ft-list" data-list="bengaluru">
+              <a href="#"><span>Jobs in Bengaluru</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Jobs in Whitefield</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Jobs in Electronic City</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Jobs in Marathahalli</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+            </div>
+            <div class="ft-list" data-list="mumbai">
+              <a href="#"><span>Jobs in Mumbai</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Jobs in Navi Mumbai</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Jobs in Thane</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Jobs in Pune</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+            </div>
+            <div class="ft-list" data-list="chennai">
+              <a href="#"><span>Jobs in Chennai</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Jobs in OMR</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Jobs in Velachery</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Jobs in Coimbatore</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+            </div>
+          </div>
+
+          <!-- RIGHT: Browse jobs by category -->
+          <div class="ft-ctx-block">
+            <h3>Browse jobs in</h3>
+            <div class="ft-tabs ft-tabs--segmented" data-tabs="category">
+              <button class="ft-tab is-on" data-tab="tech" type="button">Tech</button>
+              <button class="ft-tab" data-tab="bpo" type="button">BPO</button>
+              <button class="ft-tab" data-tab="bfsi" type="button">BFSI</button>
+              <button class="ft-tab" data-tab="sales" type="button">Sales</button>
+            </div>
+            <div class="ft-list is-on" data-list="tech">
+              <a href="#"><span>AI jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Data analyst jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Cyber security jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Data science jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#" class="ft-view-all"><span>View all</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+            </div>
+            <div class="ft-list" data-list="bpo">
+              <a href="#"><span>Customer service jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Voice process jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Non-voice process jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Tele-caller jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#" class="ft-view-all"><span>View all</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+            </div>
+            <div class="ft-list" data-list="bfsi">
+              <a href="#"><span>Banking jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Insurance jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Investment banking jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Risk management jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#" class="ft-view-all"><span>View all</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+            </div>
+            <div class="ft-list" data-list="sales">
+              <a href="#"><span>Field sales jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Enterprise sales jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Inside sales jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#"><span>Business development jobs</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+              <a href="#" class="ft-view-all"><span>View all</span><span class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ───── 2. Sitemap: brand + 3 link cols ───── -->
+        <div class="ft-sitemap">
+          <div class="ft-brand-block">
+            <span class="ft-brand-mark">
+              <svg viewBox="0 0 240 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M38.8164 104.079C43.392 104.079 47.3954 105.167 50.8271 107.341C54.3162 109.458 56.7761 112.462 58.2061 116.353L48.6826 120.815C47.9963 118.87 46.7375 117.325 44.9072 116.181C43.1343 114.979 41.104 114.378 38.8164 114.378C37.1577 114.378 35.8415 114.722 34.8691 115.408C33.9542 116.095 33.4972 117.039 33.4971 118.24C33.4971 118.87 33.6685 119.442 34.0117 119.957C34.3549 120.472 34.8981 120.93 35.6416 121.33C36.4424 121.731 37.4147 122.103 38.5586 122.446L46.0225 124.678C49.9118 125.822 52.8862 127.567 54.9453 129.913C57.0043 132.202 58.0341 135.034 58.0342 138.409C58.0342 141.327 57.262 143.874 55.7178 146.048C54.2307 148.222 52.1431 149.939 49.4551 151.197C46.7669 152.399 43.5922 153 39.9316 153C34.7841 153 30.294 151.798 26.4619 149.396C22.6869 146.935 20.113 143.645 18.7402 139.525L28.1777 135.062C29.3788 137.58 31.0085 139.554 33.0674 140.984C35.1265 142.415 37.415 143.13 39.9316 143.13C41.7618 143.13 43.1634 142.758 44.1357 142.015C45.108 141.271 45.5937 140.241 45.5938 138.925C45.5938 138.238 45.4223 137.666 45.0791 137.208C44.736 136.693 44.2213 136.235 43.5352 135.835C42.8488 135.434 41.9905 135.091 40.9609 134.805L32.9824 132.573C29.1503 131.486 26.2046 129.741 24.1455 127.338C22.0865 124.878 21.0567 121.988 21.0566 118.67C21.0566 115.752 21.8 113.206 23.2871 111.031C24.7742 108.857 26.8617 107.169 29.5498 105.968C32.2381 104.709 35.3274 104.079 38.8164 104.079Z" fill="white"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M201.976 104.079C205.693 104.079 208.982 104.68 211.842 105.882C214.702 107.026 217.104 108.656 219.049 110.773C221.051 112.89 222.566 115.351 223.596 118.154C224.625 120.901 225.14 123.905 225.14 127.166C225.14 128.081 225.083 128.998 224.969 129.913C224.912 130.771 224.768 131.515 224.539 132.145H191.731C191.885 133.344 192.181 134.459 192.623 135.491C193.481 137.494 194.797 139.068 196.57 140.212C198.343 141.299 200.488 141.843 203.005 141.843C205.293 141.843 207.237 141.385 208.839 140.47C210.497 139.554 211.784 138.295 212.699 136.693L222.995 141.585C222.08 143.874 220.621 145.876 218.619 147.593C216.674 149.309 214.358 150.654 211.67 151.627C208.982 152.542 206.036 153 202.833 153C197.857 153 193.539 151.913 189.878 149.738C186.217 147.507 183.386 144.532 181.384 140.812C179.382 137.094 178.381 132.974 178.381 128.454C178.381 123.762 179.411 119.585 181.47 115.923C183.586 112.261 186.418 109.372 189.964 107.255C193.51 105.138 197.514 104.079 201.976 104.079ZM201.976 114.378C199.745 114.378 197.828 114.922 196.227 116.009C194.625 117.096 193.424 118.698 192.623 120.815C192.399 121.409 192.214 122.038 192.066 122.703H211.505C211.431 121.983 211.287 121.296 211.069 120.644C210.44 118.698 209.325 117.182 207.724 116.095C206.179 114.95 204.263 114.378 201.976 114.378Z" fill="white"/>
+                <path d="M75.6787 109.418C76.6593 108.043 77.8885 106.949 79.3682 106.139C81.8276 104.765 84.688 104.079 87.9482 104.079C91.4943 104.079 94.5829 104.823 97.2139 106.311C99.9021 107.798 101.989 109.887 103.477 112.576C104.964 115.208 105.708 118.298 105.708 121.846V151.97H92.8379V124.592C92.8379 122.761 92.4662 121.187 91.7227 119.871C91.0363 118.555 90.0352 117.525 88.7197 116.781C87.4615 116.038 85.9745 115.666 84.2588 115.666C82.6001 115.666 81.1124 116.037 79.7969 116.781C78.4815 117.525 77.4525 118.555 76.709 119.871C76.0226 121.187 75.6787 122.761 75.6787 124.592V151.97H62.8096V87H75.6787V109.418Z" fill="white"/>
+                <path d="M124.123 151.97H111.254V105.109H124.123V151.97Z" fill="white"/>
+                <path d="M155.763 104.079C159.309 104.079 162.397 104.823 165.028 106.311C167.717 107.798 169.805 109.887 171.292 112.576C172.779 115.208 173.522 118.298 173.522 121.846V151.97H160.653V124.592C160.653 122.761 160.282 121.187 159.538 119.871C158.852 118.555 157.851 117.525 156.535 116.781C155.277 116.037 153.789 115.666 152.073 115.666C150.415 115.666 148.928 116.038 147.612 116.781C146.297 117.525 145.267 118.555 144.523 119.871C143.837 121.187 143.494 122.761 143.494 124.592V151.97H130.625V105.109H142.636V110.811C143.719 108.764 145.235 107.206 147.184 106.139C149.643 104.766 152.503 104.079 155.763 104.079Z" fill="white"/>
+                <path d="M117.353 88C120.936 88.0002 123.84 90.8936 123.84 94.4883C123.84 98.0791 120.936 100.972 117.353 100.973C113.767 100.973 110.867 98.0793 110.867 94.4883C110.867 90.8934 113.767 88 117.353 88Z" fill="white"/>
+                <path d="M111.367 38C151.563 38 186.076 62.3239 200.993 97.0547C196.523 97.1799 192.397 98.1007 188.614 99.8174C174.186 68.2516 142.335 46.3175 105.36 46.3174C61.9889 46.3174 25.6667 76.4962 16.2451 117H15.6201C24.2635 71.9991 63.8449 38 111.367 38Z" fill="#FACA22"/>
+                <path d="M119.367 27C167.02 27 207.291 58.5937 220.382 101.977C218.896 101.024 217.289 100.2 215.559 99.5078C212.244 98.1144 208.508 97.3131 204.352 97.0996C189.475 61.2298 154.118 36 112.867 36C64.338 36 23.9658 70.918 15.501 117H15C22.497 66.0825 66.3669 27 119.367 27Z" fill="#1A56FF"/>
+              </svg>
+            </span>
+            <p>India's most trusted job platform. 8L+ live roles, 50K+ verified employers, free to apply.</p>
+            <div class="ft-socials">
+              <a href="#" aria-label="LinkedIn">in</a>
+              <a href="#" aria-label="Instagram">Ig</a>
+              <a href="#" aria-label="Facebook">f</a>
+              <a href="#" aria-label="YouTube">YT</a>
+              <a href="#" aria-label="X">X</a>
+            </div>
+          </div>
+
+          <div class="ft-col">
+            <h5>Job Seekers</h5>
+            <ul>
+              <li><a href="#">Search jobs</a></li>
+              <li><a href="#">Trending jobs</a></li>
+              <li><a href="#">Courses</a></li>
+              <li><a href="#">Job assistance services</a></li>
+              <li><a href="#">Create a job alert</a></li>
+            </ul>
+          </div>
+
+          <div class="ft-col">
+            <h5>Company</h5>
+            <ul>
+              <li><a href="#">About us</a></li>
+              <li><a href="#">Careers</a></li>
+              <li><a href="#">Contact us</a></li>
+              <li><a href="#">Fraud alert</a></li>
+              <li><a href="#">FAQ's</a></li>
+            </ul>
+          </div>
+
+          <div class="ft-col">
+            <h5>Employers</h5>
+            <ul>
+              <li><a href="#">Post a job</a></li>
+              <li><a href="#">Register/Log In</a></li>
+              <li><a href="#">Shine Recruiter</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- ───── 3. Partner sites ───── -->
+        <div class="ft-partners">
+          <span class="ft-partners-label">Our partner sites</span>
+          <div class="ft-partner-row">
+            <a href="#" class="ft-partner p-mint">Livemint</a>
+            <a href="#" class="ft-partner p-patrika">Patrika</a>
+            <a href="#" class="ft-partner p-ottplay">OTTplay</a>
+            <a href="#" class="ft-partner p-indic">Indicshemaroo</a>
+            <a href="#" class="ft-partner p-ht">HT</a>
+            <a href="#" class="ft-partner p-desi">Desimartini</a>
+          </div>
+        </div>
+
+        <!-- ───── 4. Bottom legal ───── -->
+        <div class="ft-bottom">
+          <span class="ft-copy">© 2026 Shine.com · All rights reserved</span>
+          <div class="ft-legal">
+            <a href="#">T&amp;C</a>
+            <a href="#">Privacy</a>
+            <a href="#">Cookies</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Relevance feedback widget — appears once the user has scrolled
+       past the 6th job card. Always-expanded card with thumbs inline.
+       Session-persisted so it doesn't reappear after dismissal/vote. -->
+  <div class="jd-fb" id="jdFb" role="dialog" aria-label="Job relevance feedback">
+    <button class="jd-fb-close" id="jdFbClose" aria-label="Dismiss">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+    </button>
+    <div class="jd-fb-text">
+      <div class="jd-fb-eyebrow">Quick check</div>
+      <div class="jd-fb-h">Are these jobs relevant?</div>
+    </div>
+    <div class="jd-fb-thumbs">
+      <button class="jd-fb-thumb" data-vote="up" aria-label="Yes, relevant">👍</button>
+      <button class="jd-fb-thumb" data-vote="down" aria-label="Not relevant">👎</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+  // ──────────────────────────────────────────────────────────
+  // Toast helper
+  // ──────────────────────────────────────────────────────────
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+  function showToast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
+  }
+
+  // ──────────────────────────────────────────────────────────
+  // Desktop JSRP — search results page (logged-out)
+  // ──────────────────────────────────────────────────────────
+  (function setupDesktopJSRP(){
+    var view = document.getElementById('viewJsrp');
+    if (!view) return;
+
+    // ── Mock job data for local development ────────────────────
+    var API_JOBS    = [];
+    var API_TOTAL   = 0;
+    var API_COHORT  = (new URLSearchParams(window.location.search).get('cohort')) || 'tech-jobs';
+    var API_LOADING = false;
+
+    var MOCK_JOBS = [
+      {
+        id: 'job-1',
+        title: 'Senior Product Manager',
+        company: 'Shine Labs',
+        location: 'Bengaluru',
+        salaryMin: 1800000,
+        salaryMax: 2600000,
+        experience: '5-8 yrs',
+        jobType: 'Full Time',
+        postedDate: 'Today',
+        urgencyBadge: 'Actively Hiring',
+        appliedToday: 24,
+        skills: ['Product Strategy', 'Roadmap Planning', 'Stakeholder Management', 'Data Analysis']
+      },
+      {
+        id: 'job-2',
+        title: 'Lead UX Designer',
+        company: 'GlowTech',
+        location: 'Mumbai',
+        salaryMin: 1500000,
+        salaryMax: 2200000,
+        experience: '4-7 yrs',
+        jobType: 'Full Time',
+        postedDate: '2 days ago',
+        urgencyBadge: 'Urgent',
+        appliedToday: 18,
+        skills: ['UX Research', 'Interaction Design', 'Prototyping', 'Design Systems']
+      },
+      {
+        id: 'job-3',
+        title: 'Data Scientist',
+        company: 'Quantica',
+        location: 'Pune',
+        salaryMin: 1700000,
+        salaryMax: 2500000,
+        experience: '3-6 yrs',
+        jobType: 'Full Time',
+        postedDate: 'Yesterday',
+        urgencyBadge: 'Closing Soon',
+        appliedToday: 33,
+        skills: ['Machine Learning', 'Python', 'Statistics', 'Data Visualization']
+      },
+      {
+        id: 'job-4',
+        title: 'Engineering Manager',
+        company: 'Nexa Solutions',
+        location: 'Chennai',
+        salaryMin: 2100000,
+        salaryMax: 3000000,
+        experience: '7-10 yrs',
+        jobType: 'Full Time',
+        postedDate: 'Today',
+        urgencyBadge: 'Actively Hiring',
+        appliedToday: 12,
+        skills: ['Team Leadership', 'Agile Delivery', 'Technical Strategy', 'Cloud Architecture']
+      },
+      {
+        id: 'job-5',
+        title: 'Sales Director',
+        company: 'BrightHire',
+        location: 'Hyderabad',
+        salaryMin: 1400000,
+        salaryMax: 2000000,
+        experience: '8-12 yrs',
+        jobType: 'Full Time',
+        postedDate: '3 days ago',
+        urgencyBadge: 'Urgent',
+        appliedToday: 29,
+        skills: ['Enterprise Sales', 'Client Relationships', 'Pipeline Management', 'Negotiation']
+      },
+      {
+        id: 'job-6',
+        title: 'Customer Success Lead',
+        company: 'SparkWorks',
+        location: 'Delhi',
+        salaryMin: 1200000,
+        salaryMax: 1600000,
+        experience: '4-6 yrs',
+        jobType: 'Full Time',
+        postedDate: '1 day ago',
+        urgencyBadge: 'Closing Soon',
+        appliedToday: 14,
+        skills: ['Client Onboarding', 'Retention', 'Product Adoption', 'Support Operations']
+      }
+    ];
+
+    // Colour map for company avatar fallback
+    var BG_COLORS = ['#4285F4','#292075','#A100FF','#006BB6','#635BFF','#F58220','#0070AD','#4A5568','#0E9A5A','#B45309'];
+    function bgForCo(name){ var h=0; for(var i=0;i<(name||'').length;i++) h=(h*31+name.charCodeAt(i))|0; return BG_COLORS[Math.abs(h)%BG_COLORS.length]; }
+    function shortFor(name){ return (name||'?').substring(0,2).toUpperCase(); }
+    function formatSalary(job){ return '₹' + (job.salaryMin/100000).toFixed(job.salaryMin%100000===0?0:1).replace('.0','') + ' - ₹' + (job.salaryMax/100000).toFixed(job.salaryMax%100000===0?0:1).replace('.0','') + ' LPA'; }
+
+    function mockJobToCard(j){
+      var badgeClass = 'closing';
+      if (j.urgencyBadge === 'Actively Hiring') badgeClass = 'actively';
+      else if (j.urgencyBadge === 'Urgent') badgeClass = 'urgent';
+
+      return {
+        id: j.id,
+        co: j.company,
+        short: shortFor(j.company),
+        bg: bgForCo(j.company),
+        time: j.postedDate || 'Recently',
+        title: j.title,
+        chips: [{cls: badgeClass, text: j.urgencyBadge}],
+        exp: j.experience || 'Not specified',
+        sal: formatSalary(j),
+        loc: (j.location||'India').split(',')[0],
+        skills: (j.skills || []).slice(0,4),
+        applyLink: '#',
+        jobType: j.jobType || 'Full Time',
+        appliedToday: j.appliedToday || 0
+      };
+    }
+
+    var listEl = document.getElementById('jdList');
+
+    function jobCardHTML(j, idx){
+      var chips = j.chips.map(function(c){ return '<span class="jd-jc-chip ' + c.cls + '">' + c.text + '</span>'; }).join('');
+      var color = j.logoColor || '#fff';
+      var payNum = (function(){ var m = (j.sal||'').match(/[\d.]+/); return m ? parseFloat(m[0]) : 0; })();
+      var expNum = (function(){ var m = (j.exp||'').match(/[\d.]+/); return m ? parseFloat(m[0]) : 0; })();
+      var icoBriefcase = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>';
+      var icoRupee     = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 8h12M9 13c0-3 9-3 9 0v5l-9-5z"/></svg>';
+      var icoPin       = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1118 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+      var icoArrow     = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+      var icoShare     = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>';
+      var visibleSkills = (j.skills || []).slice(0, 4);
+      var skillsHTML = visibleSkills.map(function(s, i){
+        return (i > 0 ? '<span class="jd-jc-skill-dot">·</span>' : '') +
+               '<span class="jd-jc-skill">' + s + '</span>';
+      }).join('');
+
+      return '<article class="jd-jc" data-idx="' + idx + '" data-pay="' + payNum + '" data-exp="' + expNum + '">' +
+        '<div class="jd-jc-top">' +
+          '<div class="jd-jc-logo" style="background:' + j.bg + ';color:' + color + '">' + j.short + '</div>' +
+          '<div class="jd-jc-co-row">' +
+            '<span class="jd-jc-co">' + j.co + '</span>' +
+            '<span class="jd-jc-co-dot"></span>' +
+            '<span class="jd-jc-time">' + j.time + '</span>' +
+            '<span class="jd-jc-chips">' + chips + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<h3 class="jd-jc-role">' + j.title + '</h3>' +
+        '<div class="jd-jc-tag-row">' +
+          '<span class="jd-jc-jobtype">' + j.jobType + '</span>' +
+          '<span class="jd-jc-applied">' + j.appliedToday + ' applied today</span>' +
+        '</div>' +
+        '<div class="jd-jc-meta">' +
+          '<span class="jd-jc-meta-item">' + icoBriefcase + j.exp + '</span>' +
+          '<span class="jd-jc-meta-divider"></span>' +
+          '<span class="jd-jc-meta-item">' + icoRupee + j.sal + '</span>' +
+          '<span class="jd-jc-meta-divider"></span>' +
+          '<span class="jd-jc-meta-item">' + icoPin + j.loc + '</span>' +
+        '</div>' +
+        '<div class="jd-jc-bottom">' +
+          '<div class="jd-jc-skills-row">' +
+            '<span class="jd-jc-skills-label">Required:</span>' +
+            '<span class="jd-jc-skills-list">' + skillsHTML + '</span>' +
+          '</div>' +
+          '<button class="jd-jc-share" data-act="share" aria-label="Share">' + icoShare + '</button>' +
+          '<button class="jd-jc-apply" data-act="apply">Apply ' + icoArrow + '</button>' +
+        '</div>' +
+      '</article>';
+    }
+
+    function renderMockJobs(){
+      API_JOBS = MOCK_JOBS.map(mockJobToCard);
+      API_TOTAL = API_JOBS.length;
+      var heroH = document.querySelector('.jd-hero-h');
+      if(heroH) heroH.innerHTML = API_COHORT + '<br>in <span class="accent" id="jdHeroQuery">India</span>';
+      var countEl = document.getElementById('jdHeroCount');
+      if(countEl) countEl.textContent = API_TOTAL.toLocaleString('en-IN');
+      var html = '';
+      API_JOBS.forEach(function(j,i){ html += jobCardHTML(j,i); });
+      if(!html) html = '<div style="padding:64px;text-align:center;color:var(--content-faded)"><b>No jobs found</b><br>Try a different cohort or check back soon.</div>';
+      listEl.innerHTML = html;
+    }
+
+    // ── Pagination bar ────────────────────────────────────────
+    function renderPager(){
+      var existing = document.getElementById('jdPager');
+      if(existing) existing.remove();
+      // Pagination is not needed for local mock mode.
+    }
+    window.__jdGoPage = function(p){ /* no-op in local mock mode */ };
+
+    // Initial load
+    renderMockJobs();
+
+    listEl.addEventListener('click', function(e){
+      var t = e.target;
+      if (t.closest('[data-act="share"]')) { e.stopPropagation(); showToast('Share link copied'); return; }
+      if (t.closest('[data-act="apply"]')) {
+        e.stopPropagation();
+        window.open('https://www.shine.com/pages/myshine/job-apply-flow?job-apply-flow=true', '_blank');
+        return;
+      }
+      var card = t.closest('.jd-jc');
+      if(card){
+        var idx = parseInt(card.getAttribute('data-idx'));
+        var job = API_JOBS[idx];
+        if(job) window.location.href = 'job.html?id='+job.id;
+      }
+    });
+
+    // ---- Hero query setter + tooltip on truncation ----
+    var heroQuery   = document.getElementById('jdHeroQuery');
+    var heroHeading = document.querySelector('.jd-hero-h');
+    var heroTip     = document.getElementById('jdHeroTip');
+    function updateHeadingTooltip(){
+      if (!heroHeading || !heroTip) return;
+      var truncated = heroHeading.scrollWidth > heroHeading.clientWidth;
+      if (truncated) {
+        heroHeading.classList.add('is-truncated');
+        heroTip.textContent = heroHeading.textContent.trim();
+      } else {
+        heroHeading.classList.remove('is-truncated');
+        heroTip.classList.remove('is-shown');
+        heroTip.textContent = '';
+      }
+    }
+    if (heroHeading && heroTip) {
+      heroHeading.addEventListener('mouseenter', function(){
+        if (heroHeading.classList.contains('is-truncated')) {
+          heroTip.classList.add('is-shown');
+          heroTip.setAttribute('aria-hidden', 'false');
+        }
+      });
+      heroHeading.addEventListener('mouseleave', function(){
+        heroTip.classList.remove('is-shown');
+        heroTip.setAttribute('aria-hidden', 'true');
+      });
+    }
+    if ('ResizeObserver' in window && heroHeading) {
+      new ResizeObserver(updateHeadingTooltip).observe(heroHeading);
+    }
+    updateHeadingTooltip();
+    window.addEventListener('resize', updateHeadingTooltip);
+
+    // ---- Compact bar reveal ----
+    // The full hero scrolls away naturally. A separate sticky
+    // compact bar (.jd-compact-bar) sits below it in the document
+    // with translateY(-100%) so it's invisible above the viewport.
+    // Once the user scrolls past the hero, we flip .is-compact on
+    // the view root, which slides the compact bar DOWN into view
+    // via the CSS transition (transform + opacity only).
+    //
+    // The trigger point is computed dynamically from the hero
+    // band's height, so it's correct at any viewport / content size.
+    // rAF-throttled scroll handler keeps it jank-free.
+    (function setupCompactReveal(){
+      var viewEl = document.getElementById('viewJsrp');
+      var hero = document.getElementById('jdDarkBand');
+      var subnav = document.getElementById('jdSubnav');
+      if (!viewEl || !hero) return;
+
+      var triggerY = 0;
+      function recalcTrigger(){
+        // Reveal compact bar when the user has scrolled past the
+        // hero AND most of the subnav row — that's when the dark
+        // theme reappears at the top, replacing the cream subnav.
+        var heroH = hero.offsetHeight;
+        var subnavH = subnav ? subnav.offsetHeight : 0;
+        triggerY = Math.max(0, heroH + subnavH - 64);
+      }
+      recalcTrigger();
+
+      var rafId = null;
+      var lastCompact = false;
+      function update(){
+        rafId = null;
+        var y = window.scrollY || window.pageYOffset || 0;
+        var compact = y >= triggerY;
+        if (compact !== lastCompact) {
+          viewEl.classList.toggle('is-compact', compact);
+          lastCompact = compact;
+        }
+      }
+      function onScroll(){
+        if (rafId == null) rafId = requestAnimationFrame(update);
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', function(){
+        recalcTrigger();
+        onScroll();
+      }, { passive: true });
+      // Recalc once fonts/images settle (watch hero + subnav)
+      if ('ResizeObserver' in window) {
+        var ro = new ResizeObserver(function(){ recalcTrigger(); onScroll(); });
+        ro.observe(hero);
+        if (subnav) ro.observe(subnav);
+      }
+      update();
+    })();
+
+    // ---- Companies carousel ----
+    // Prev/next arrows scroll the chip track left/right by ~280px;
+    // clicking a chip activates it (visual only for POC). Buttons
+    // disable themselves at the start/end of the scroll range.
+    (function setupCompaniesCarousel(){
+      var fullTrack = document.getElementById('jdCompaniesTrack');
+      var compactTrack = document.getElementById('jdCompactCompaniesTrack');
+      if (!fullTrack) return;
+
+      // ── Clone chips from the cream subnav into the compact bar
+      // so the markup stays declarative on the subnav and the
+      // compact carousel is purely a mirror.
+      if (compactTrack) {
+        fullTrack.querySelectorAll('.jd-company').forEach(function(chip){
+          compactTrack.appendChild(chip.cloneNode(true));
+        });
+      }
+
+      // ── Nav arrows: each .jd-companies-nav has a data-target so
+      // it knows which track to scroll. If absent, default to the
+      // full subnav track (legacy behavior).
+      function trackFor(btn){
+        var id = btn.getAttribute('data-target');
+        return id ? document.getElementById(id) : fullTrack;
+      }
+
+      function updateNavState(){
+        document.querySelectorAll('.jd-companies-nav').forEach(function(btn){
+          var t = trackFor(btn);
+          if (!t) return;
+          var maxScroll = t.scrollWidth - t.clientWidth;
+          var dir = parseInt(btn.getAttribute('data-dir'), 10);
+          if (dir < 0) {
+            btn.disabled = t.scrollLeft <= 2;
+          } else {
+            btn.disabled = t.scrollLeft >= maxScroll - 2;
+          }
+        });
+      }
+
+      document.querySelectorAll('.jd-companies-nav').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var t = trackFor(btn);
+          if (!t) return;
+          var dir = parseInt(btn.getAttribute('data-dir'), 10);
+          t.scrollBy({ left: dir * 280, behavior: 'smooth' });
+        });
+      });
+      [fullTrack, compactTrack].filter(Boolean).forEach(function(t){
+        t.addEventListener('scroll', updateNavState, { passive: true });
+      });
+      window.addEventListener('resize', updateNavState, { passive: true });
+      updateNavState();
+
+      // ── Chip selection: clicking a chip in EITHER track activates
+      // both copies (same data-company value) and de-selects all
+      // others. Single source of truth, two visual mirrors.
+      function activate(company){
+        document.querySelectorAll('.jd-company').forEach(function(c){
+          c.classList.toggle('is-on', c.getAttribute('data-company') === company);
+        });
+      }
+      document.addEventListener('click', function(e){
+        var chip = e.target.closest('.jd-company');
+        if (!chip) return;
+        var company = chip.getAttribute('data-company');
+        if (!company) return;
+        activate(company);
+        showToast('Filtered to ' + chip.textContent.trim());
+      });
+    })();
+
+    // ---- Compact bar proxies ----
+    // The full hero's Sort+Filter buttons own the real handlers
+    // (defined later in this script). The compact bar's buttons
+    // are visual duplicates that forward clicks to those originals
+    // via [data-proxy]. Sort label, filter badge, and count are
+    // mirrored from the canonical full-hero elements to the compact
+    // bar so updates stay in sync without duplicated state.
+    (function setupCompactProxies(){
+      document.querySelectorAll('.jd-compact-bar [data-proxy]').forEach(function(btn){
+        var targetId = btn.getAttribute('data-proxy');
+        btn.addEventListener('click', function(e){
+          e.preventDefault();
+          var target = document.getElementById(targetId);
+          if (target) target.click();
+        });
+      });
+      // Sort label mirror — full (canonical) → compact
+      var src = document.getElementById('jdSortBtnLabel');
+      var dst = document.getElementById('jdSortBtnLabelCompact');
+      if (src && dst && 'MutationObserver' in window) {
+        dst.textContent = src.textContent;
+        new MutationObserver(function(){
+          dst.textContent = src.textContent;
+        }).observe(src, { childList: true, characterData: true, subtree: true });
+      }
+      // Filter badge mirror
+      var bsrc = document.getElementById('jdFilterBadge');
+      var bdst = document.querySelector('.jd-compact-bar [data-proxy-badge="jdFilterBadge"]');
+      if (bsrc && bdst && 'MutationObserver' in window) {
+        var sync = function(){
+          bdst.textContent = bsrc.textContent;
+          bdst.classList.toggle('show', bsrc.classList.contains('show'));
+        };
+        sync();
+        new MutationObserver(sync).observe(bsrc, {
+          attributes: true, attributeFilter: ['class'],
+          childList: true, characterData: true, subtree: true
+        });
+      }
+      // Count mirror
+      var csrc = document.getElementById('jdHeroCount');
+      var cdst = document.getElementById('jdHeroCountCompact');
+      if (csrc && cdst) cdst.textContent = csrc.textContent;
+    })();
+
+    // ============ Sort popover ============
+    var sortBtn       = document.getElementById('jdSortBtn');
+    var sortPop       = document.getElementById('jdSortPop');
+    var sortLabelBtn  = document.getElementById('jdSortBtnLabel');
+    function closeSortPop(){ sortBtn.classList.remove('is-open'); }
+    sortBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var open = sortBtn.classList.toggle('is-open');
+      if (open) closeFilterModal();
+    });
+    document.addEventListener('click', function(e){
+      if (!sortBtn.contains(e.target) && !sortPop.contains(e.target)) closeSortPop();
+    });
+    sortPop.querySelectorAll('.jd-sort-pop-row').forEach(function(row){
+      row.addEventListener('click', function(){
+        sortPop.querySelectorAll('.jd-sort-pop-row').forEach(function(r){ r.classList.remove('active'); });
+        row.classList.add('active');
+        var sort = row.getAttribute('data-sort');
+        var label = row.querySelector('.lbl').textContent;
+        var btnShort = label.split(' · ')[0];
+        sortLabelBtn.textContent = btnShort;
+        var cards = Array.prototype.slice.call(listEl.querySelectorAll('.jd-jc'));
+        cards.sort(function(a,b){
+          if (sort === 'relevance') return parseInt(a.dataset.idx) - parseInt(b.dataset.idx);
+          if (sort === 'recent')    return parseInt(b.dataset.idx) - parseInt(a.dataset.idx);
+          if (sort === 'payHigh')   return parseFloat(b.dataset.pay) - parseFloat(a.dataset.pay);
+          if (sort === 'payLow')    return parseFloat(a.dataset.pay) - parseFloat(b.dataset.pay);
+          if (sort === 'expLow')    return parseFloat(a.dataset.exp) - parseFloat(b.dataset.exp);
+          return 0;
+        });
+        cards.forEach(function(c){ listEl.appendChild(c); });
+        showToast('Sorted by ' + label);
+        closeSortPop();
+      });
+    });
+
+    // ============ Filter drawer — Quick Filter Cards ============
+    var FILTERS = [
+      { key:'location', name:'Location', type:'checkbox', searchable:true,
+        options:[
+          {id:'all-india',label:'All India',count:28969},{id:'bangalore',label:'Bangalore',count:8421},
+          {id:'hyderabad',label:'Hyderabad',count:5234},{id:'pune',label:'Pune',count:4180},
+          {id:'mumbai',label:'Mumbai',count:3672},{id:'chennai',label:'Chennai',count:3121},
+          {id:'delhi-ncr',label:'Delhi NCR',count:2987},{id:'gurgaon',label:'Gurgaon',count:2410},
+          {id:'noida',label:'Noida',count:1908},{id:'kolkata',label:'Kolkata',count:1240},
+          {id:'ahmedabad',label:'Ahmedabad',count:980},{id:'jaipur',label:'Jaipur',count:740}
+        ] },
+      { key:'experience', name:'Experience', type:'checkbox',
+        options:[
+          {id:'0-1',label:'0 to 1 Years',count:4120},{id:'1-3',label:'1 to 3 Years',count:12480},
+          {id:'3-6',label:'3 to 6 Years',count:18230},{id:'6-8',label:'6 to 8 Years',count:23350},
+          {id:'8-10',label:'8 to 10 Years',count:15740},{id:'10-15',label:'10 to 15 Years',count:9820},
+          {id:'15+',label:'15+ Years',count:4150}
+        ] },
+      { key:'salary', name:'Salary', type:'checkbox',
+        options:[
+          {id:'0-3',label:'0 To 3 Lakh',count:1820},{id:'3-5',label:'3 To 5 Lakh',count:2080},
+          {id:'5-10',label:'5 To 10 Lakh',count:7421},{id:'10-15',label:'10 To 15 Lakh',count:6240},
+          {id:'15-25',label:'15 To 25 Lakh',count:4980},{id:'25-50',label:'25 To 50 Lakh',count:2110},
+          {id:'50+',label:'50 Lakh+',count:580}
+        ] },
+      { key:'jobtype', name:'Job Type', type:'checkbox',
+        options:[
+          {id:'permanent',label:'Permanent',count:24820},
+          {id:'contractual',label:'Contractual',count:3210},
+          {id:'freelance',label:'Freelance',count:590},
+          {id:'internship',label:'Internship',count:349}
+        ] },
+      { key:'jobmode', name:'Job Mode', type:'checkbox',
+        options:[
+          {id:'onsite',label:'On Site',count:18500},
+          {id:'remote',label:'Remote',count:4890},
+          {id:'hybrid',label:'Hybrid',count:5579}
+        ] }
+    ];
+    var POPULAR = {
+      location:['bangalore','hyderabad','pune','mumbai'],
+      experience:['1-3','3-6','6-8'],
+      salary:['5-10','10-15','15-25'],
+      jobtype:['permanent','contractual','freelance','internship'],
+      jobmode:['onsite','remote','hybrid']
+    };
+
+    var modal       = document.getElementById('jdfm');
+    var modalBd     = document.getElementById('jdfmBd');
+    var modalBody   = document.getElementById('jdfmBody');
+    var modalClose  = document.getElementById('jdfmClose');
+    var clearBtn    = document.getElementById('jdfmClearBtn');
+    var applyBtn    = document.getElementById('jdfmApply');
+    var jobsLbl     = document.getElementById('jdfmJobs');
+    var filterBtn   = document.getElementById('jdFilterBtn');
+    var filterBadge = document.getElementById('jdFilterBadge');
+    var sub         = document.getElementById('jdfmSub');
+    var subBd       = document.getElementById('jdfmSubBd');
+    var subTitle    = document.getElementById('jdfmSubTitle');
+    var subRows     = document.getElementById('jdfmSubRows');
+    var subClose    = document.getElementById('jdfmSubClose');
+    var subDone     = document.getElementById('jdfmSubDone');
+    var subSW       = document.getElementById('jdfmSubSearchWrap');
+    var subS        = document.getElementById('jdfmSubSearch');
+
+    var state = {};
+    FILTERS.forEach(function(f){ state[f.key]={}; (f.defaultSelected||[]).forEach(function(id){ state[f.key][id]=true; }); });
+    var subKey = null;
+    var subQuery = '';
+
+    function fmt(n){ return n==null ? '' : n.toLocaleString('en-IN'); }
+    function findCat(k){ for (var i=0;i<FILTERS.length;i++) if (FILTERS[i].key===k) return FILTERS[i]; return null; }
+    function selKeys(k){ return Object.keys(state[k]).filter(function(id){ return state[k][id]; }); }
+    function selHas(k,id){ return !!state[k][id]; }
+    function selToggle(k,id){ if (state[k][id]) delete state[k][id]; else state[k][id]=true; }
+    function selClear(k){ state[k]={}; }
+    function totalSelected(){ var n=0; FILTERS.forEach(function(f){ if (f.type==='radio') return; n += selKeys(f.key).length; }); return n; }
+
+    function estimateJobs(){
+      var BASE = 28969;
+      var sets = [];
+      FILTERS.forEach(function(f){
+        if (f.type==='radio') return;
+        var sel = selKeys(f.key); if (!sel.length) return;
+        var sum = 0;
+        sel.forEach(function(id){
+          var opt = null;
+          for (var i=0;i<f.options.length;i++) if (f.options[i].id===id) { opt=f.options[i]; break; }
+          if (opt && opt.count) sum += opt.count;
+        });
+        sets.push(Math.min(sum, BASE));
+      });
+      if (!sets.length) return BASE;
+      var minSet = Math.min.apply(null, sets);
+      var factor = Math.pow(0.78, sets.length-1);
+      return Math.max(1, Math.round(minSet*factor));
+    }
+
+    function buildCardPills(f){
+      var popular = POPULAR[f.key] || f.options.slice(0,4).map(function(o){ return o.id; });
+      var sel = selKeys(f.key);
+      var extras = sel.filter(function(id){ return popular.indexOf(id) === -1; });
+      var ids = extras.concat(popular);
+      var seen = {}, out = [];
+      ids.forEach(function(id){
+        if (seen[id]) return; seen[id] = true;
+        var opt = null;
+        for (var i=0;i<f.options.length;i++) if (f.options[i].id===id) { opt=f.options[i]; break; }
+        if (opt) out.push({ opt:opt, isExtra: extras.indexOf(id) !== -1 });
+      });
+      return out;
+    }
+
+    function renderCards(){
+      modalBody.innerHTML = '';
+      FILTERS.forEach(function(f){
+        var sel = selKeys(f.key);
+        var card = document.createElement('div');
+        card.className = 'jdfm-card' + (f.type !== 'radio' && sel.length > 0 ? ' has-selection' : '');
+
+        var head = document.createElement('div');
+        head.className = 'jdfm-card-h';
+        head.innerHTML =
+          '<div class="jdfm-card-name"><span>' + f.name + '</span>' +
+            (f.type !== 'radio' && sel.length > 0 ? '<span class="jdfm-card-count">' + sel.length + '</span>' : '') +
+          '</div>' +
+          '<button class="jdfm-card-clear" type="button">Clear</button>';
+        head.querySelector('.jdfm-card-clear').addEventListener('click', function(){
+          if (f.type==='radio') return;
+          selClear(f.key); renderAll();
+        });
+        card.appendChild(head);
+
+        var pillsWrap = document.createElement('div');
+        pillsWrap.className = 'jdfm-pills';
+        buildCardPills(f).forEach(function(item){
+          var p = document.createElement('button');
+          p.type = 'button';
+          p.className = 'jdfm-pill' + (selHas(f.key, item.opt.id) ? ' is-on' : '') + (item.isExtra ? ' is-extra' : '');
+          p.innerHTML = '<span>' + item.opt.label + '</span>' +
+            (item.opt.count != null ? '<span class="jdfm-pill-count">' + fmt(item.opt.count) + '</span>' : '');
+          p.addEventListener('click', function(){
+            if (f.type==='radio') { selClear(f.key); state[f.key][item.opt.id] = true; }
+            else selToggle(f.key, item.opt.id);
+            renderAll();
+          });
+          pillsWrap.appendChild(p);
+        });
+        card.appendChild(pillsWrap);
+
+        var popSet = {};
+        (POPULAR[f.key] || f.options.slice(0,4).map(function(o){ return o.id; })).forEach(function(id){ popSet[id]=true; });
+        var hidden = 0;
+        f.options.forEach(function(o){ if (!popSet[o.id] && !selHas(f.key, o.id)) hidden++; });
+        if (hidden > 0) {
+          var m = document.createElement('button');
+          m.type = 'button';
+          m.className = 'jdfm-more';
+          m.textContent = 'See all ' + f.options.length;
+          m.addEventListener('click', function(){ openSub(f.key); });
+          card.appendChild(m);
+        }
+
+        modalBody.appendChild(card);
+      });
+    }
+
+    function renderApply(){
+      var n = totalSelected();
+      jobsLbl.textContent = fmt(estimateJobs());
+      if (filterBadge) {
+        filterBadge.textContent = n;
+        filterBadge.classList.toggle('show', n > 0);
+      }
+    }
+
+    function renderAll(){
+      renderCards();
+      renderApply();
+      if (subKey) renderSubRows();
+    }
+
+    function makeRow(f, opt, isOn, onClick){
+      var r = document.createElement('button');
+      r.type = 'button';
+      r.className = 'jdfm-sub-row' + (isOn ? ' is-on' : '');
+      r.innerHTML = '<span class="lbl">' + opt.label + '</span>' +
+        (opt.count != null ? '<span class="cnt">' + fmt(opt.count) + '</span>' : '') +
+        '<span class="ck">' + (f.type==='checkbox' ? '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : '') + '</span>';
+      r.addEventListener('click', onClick);
+      return r;
+    }
+
+    function renderSubRows(){
+      if (!subKey) return;
+      var f = findCat(subKey); if (!f) return;
+      var q = subQuery.toLowerCase();
+      subRows.innerHTML = '';
+      function handler(opt){
+        if (f.type==='radio') { selClear(f.key); state[f.key][opt.id]=true; }
+        else selToggle(f.key, opt.id);
+        renderAll();
+      }
+      if (q) {
+        var list = f.options.filter(function(o){ return o.label.toLowerCase().indexOf(q)!==-1; });
+        if (!list.length) { subRows.innerHTML = '<div class="jdfm-empty">No matches</div>'; return; }
+        list.forEach(function(o){ subRows.appendChild(makeRow(f, o, selHas(f.key,o.id), function(){ handler(o); })); });
+      } else {
+        var selectedList   = f.options.filter(function(o){ return selHas(f.key,o.id); });
+        var unselectedList = f.options.filter(function(o){ return !selHas(f.key,o.id); });
+        if (selectedList.length) {
+          var lbl = document.createElement('div');
+          lbl.className = 'jdfm-sub-section';
+          lbl.textContent = 'Selected · ' + selectedList.length;
+          subRows.appendChild(lbl);
+          selectedList.forEach(function(o){ subRows.appendChild(makeRow(f, o, true, function(){ handler(o); })); });
+        }
+        if (unselectedList.length) {
+          var lbl2 = document.createElement('div');
+          lbl2.className = 'jdfm-sub-section';
+          lbl2.textContent = 'All ' + f.options.length + ' ' + f.name.toLowerCase();
+          subRows.appendChild(lbl2);
+          unselectedList.forEach(function(o){ subRows.appendChild(makeRow(f, o, false, function(){ handler(o); })); });
+        }
+      }
+    }
+
+    function openSub(key){
+      subKey = key; subQuery = ''; subS.value = '';
+      var f = findCat(key);
+      subTitle.textContent = f.name;
+      subSW.style.display = f.searchable ? 'block' : 'none';
+      renderSubRows();
+      sub.classList.add('is-shown');
+      subBd.classList.add('is-shown');
+    }
+    function closeSub(){
+      subKey = null;
+      sub.classList.remove('is-shown');
+      subBd.classList.remove('is-shown');
+    }
+
+    function openFilterModal(){ modal.classList.add('open'); modalBd.classList.add('show'); filterBtn.classList.add('is-open'); closeSortPop(); }
+    function closeFilterModal(){ closeSub(); modal.classList.remove('open'); modalBd.classList.remove('show'); filterBtn.classList.remove('is-open'); }
+
+    filterBtn.addEventListener('click', openFilterModal);
+    modalBd.addEventListener('click', closeFilterModal);
+    modalClose.addEventListener('click', closeFilterModal);
+    clearBtn.addEventListener('click', function(){
+      FILTERS.forEach(function(f){ if (f.type !== 'radio') selClear(f.key); });
+      renderAll();
+    });
+    applyBtn.addEventListener('click', function(){
+      var n = totalSelected();
+      showToast(n === 0 ? 'Showing all jobs' : 'Showing ' + fmt(estimateJobs()) + ' jobs');
+      closeFilterModal();
+    });
+    subS.addEventListener('input', function(e){ subQuery = e.target.value; renderSubRows(); });
+    subClose.addEventListener('click', closeSub);
+    subBd.addEventListener('click', closeSub);
+    subDone.addEventListener('click', closeSub);
+
+    document.addEventListener('keydown', function(e){
+      if (e.key !== 'Escape') return;
+      if (sub.classList.contains('is-shown')) { closeSub(); return; }
+      if (modal.classList.contains('open')) { closeFilterModal(); return; }
+      if (sortBtn.classList.contains('is-open')) { closeSortPop(); return; }
+    });
+
+    renderAll();
+
+    // ---- Relevance feedback widget ----
+    // Lifecycle, designed to be helpful but never frustrating:
+    //   1. First appearance: when the 6th job card scrolls into view.
+    //   2. If the user keeps scrolling past it without interacting, the
+    //      nudge quietly slides itself away (so it doesn't camp on screen
+    //      while they're focused on browsing).
+    //   3. One retry: once the 14th card (6 + 8 more) scrolls into view,
+    //      it reappears once. After that, we leave the user alone for the
+    //      rest of the session.
+    //   4. Voting OR explicit close = permanent dismiss for the session
+    //      (no retry). Only passive "ignored + scrolled past" qualifies
+    //      for the second appearance.
+    (function setupFeedbackWidget(){
+      var fb = document.getElementById('jdFb');
+      if (!fb) return;
+      // Hard-dismissed (voted or X'd) this session? Never show again.
+      try {
+        if (sessionStorage.getItem('jdFbDone') === '1') return;
+      } catch (e) {}
+
+      if (!('IntersectionObserver' in window)) return;
+
+      var cards = listEl.querySelectorAll('.jd-jc');
+      var firstTrigger  = cards[5];   // 6th job  (0-indexed)
+      // Retry should fire ~8 cards later. If the feed is shorter than
+      // that (demo data, sparse results), fall back to the last card so
+      // the retry still gets a chance.
+      var secondTrigger = cards[13] || cards[cards.length - 1];
+      if (secondTrigger === firstTrigger) secondTrigger = null;
+      if (!firstTrigger) return;
+
+      var shown = false;          // currently visible on screen?
+      var retryUsed = false;      // already used our one retry?
+      var autoHideTimer = null;   // pending "passive ignore" hide
+      var revealTimer = null;     // pending reveal animation
+      var AUTO_HIDE_MS = 6000;    // grace period before passive hide
+
+      function clearTimers(){
+        if (autoHideTimer) { clearTimeout(autoHideTimer); autoHideTimer = null; }
+        if (revealTimer)   { clearTimeout(revealTimer);   revealTimer   = null; }
+      }
+
+      function reveal(){
+        if (shown) return;
+        // Small settle delay so it doesn't pop the moment the card edge
+        // crosses the viewport — feels more considered.
+        revealTimer = setTimeout(function(){
+          fb.classList.add('show');
+          shown = true;
+          // Start the passive-ignore countdown. We only hide if the
+          // user keeps scrolling — see scroll handler below.
+          armAutoHide();
+        }, 400);
+      }
+
+      function passiveHide(){
+        // User ignored + scrolled away — slide it out, but DON'T mark
+        // session as done. Keeps the retry path open.
+        if (!shown) return;
+        fb.classList.remove('show');
+        shown = false;
+        clearTimers();
+      }
+
+      function done(){
+        // Hard dismiss — voted or closed. No retry.
+        try { sessionStorage.setItem('jdFbDone', '1'); } catch (e) {}
+        fb.classList.remove('show');
+        shown = false;
+        clearTimers();
+        if (firstIO)  firstIO.disconnect();
+        if (secondIO) secondIO.disconnect();
+      }
+
+      // Auto-hide arms only when the user is actively scrolling. If they
+      // stop (e.g. they're reading a card), we let the widget linger —
+      // they may still want to vote. The timer resets on each scroll
+      // burst so it represents "still scrolling N seconds in".
+      var scrollDebounce = null;
+      function armAutoHide(){
+        if (autoHideTimer) clearTimeout(autoHideTimer);
+        autoHideTimer = setTimeout(passiveHide, AUTO_HIDE_MS);
+      }
+      function onScrollWhileShown(){
+        if (!shown) return;
+        // Each scroll burst extends the grace period slightly so we
+        // don't yank the widget mid-flick. Net effect: hides shortly
+        // after the user has clearly moved on past the original card.
+        if (scrollDebounce) clearTimeout(scrollDebounce);
+        scrollDebounce = setTimeout(armAutoHide, 150);
+      }
+      window.addEventListener('scroll', onScrollWhileShown, { passive: true });
+
+      // First appearance — at card 6.
+      var firstIO = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.isIntersecting) {
+            reveal();
+            firstIO.disconnect();
+          }
+        });
+      });
+      firstIO.observe(firstTrigger);
+
+      // Retry — at card 14, once, only if first showing was passively
+      // ignored (not voted/closed). The retryUsed flag guards against
+      // ever showing a third time.
+      var secondIO = null;
+      if (secondTrigger) {
+        secondIO = new IntersectionObserver(function(entries){
+          entries.forEach(function(entry){
+            if (entry.isIntersecting && !retryUsed) {
+              retryUsed = true;
+              // Only re-reveal if we're not currently visible and not
+              // hard-dismissed.
+              var dismissed = false;
+              try { dismissed = sessionStorage.getItem('jdFbDone') === '1'; } catch (e) {}
+              if (!dismissed && !shown) reveal();
+              secondIO.disconnect();
+            }
+          });
+        });
+        secondIO.observe(secondTrigger);
+      }
+
+      var closeBtn = document.getElementById('jdFbClose');
+      if (closeBtn) closeBtn.addEventListener('click', done);
+
+      fb.querySelectorAll('.jd-fb-thumb').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          // Voting cancels any pending auto-hide so the Thanks state
+          // gets its full moment.
+          clearTimers();
+          fb.classList.add('is-thanks');
+          var h = fb.querySelector('.jd-fb-h');
+          if (h) {
+            h.innerHTML =
+              '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' +
+              'Thanks — that helps us tune your results.';
+          }
+          setTimeout(done, 2200);
+        });
+      });
+    })();
+
+    // ---- Footer tab interactions ----
+    // Each .ft-tabs group switches the matching .ft-list (by data-list
+    // value matching the clicked tab's data-tab value). Generalized
+    // so the same wiring drives both the "Java Developer jobs" city
+    // tabs and the "Browse jobs in" category tabs.
+    document.querySelectorAll('.ft-tabs').forEach(function(tabs){
+      var block = tabs.closest('.ft-ctx-block');
+      if (!block) return;
+      tabs.querySelectorAll('.ft-tab').forEach(function(tab){
+        tab.addEventListener('click', function(){
+          var key = tab.getAttribute('data-tab');
+          tabs.querySelectorAll('.ft-tab').forEach(function(t){
+            t.classList.toggle('is-on', t === tab);
+          });
+          block.querySelectorAll('.ft-list').forEach(function(list){
+            list.classList.toggle('is-on', list.getAttribute('data-list') === key);
+          });
+        });
+      });
+    });
+  })();
+  </script>
+
+  <script>
+  (function(){
+    const target = document.getElementById('cohortApp');
+    target.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div style="font-weight:800;color:#22C55E">shine — Cohorts</div><div><a href="/admin" style="color:#000;background:#22C55E;padding:8px 12px;border-radius:8px;text-decoration:none;font-weight:700">+ Create Cohort</a></div></div><div id="grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:18px"></div><div id="empty" style="display:none;padding:48px;text-align:center;color:#9CA3AF">No cohorts yet — Go to Admin</div>`;
+
+    async function load(){
+      try{
+        const r = await fetch('/api/cohorts');
+        const d = await r.json();
+        const cohorts = d.cohorts || {};
+        const keys = Object.keys(cohorts);
+        const grid = document.getElementById('grid');
+        const empty = document.getElementById('empty');
+        if(keys.length===0){ empty.style.display='block'; grid.style.display='none'; return; }
+        empty.style.display='none'; grid.style.display='grid'; grid.innerHTML='';
+        keys.forEach(slug=>{
+          const c = cohorts[slug];
+          const card = document.createElement('div'); card.style.background='#111'; card.style.padding='14px'; card.style.border='1px solid #2A2A2A'; card.style.borderRadius='12px'; card.style.transition='transform .12s';
+          card.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:700">${c.name}</div><div style="color:#9CA3AF">${c.keyword}</div></div><div><div style="font-weight:700;padding:6px 10px;border-radius:12px;background:${c.status==='done'?'#22C55E':'#EAB308'};color:#000">${c.status||'idle'}</div></div></div><div style="margin-top:12px;color:#9CA3AF">Jobs: ${c.count||0}</div><div style="margin-top:8px"><a href="/jobs/${c.slug}" style="color:#22C55E;text-decoration:none">View</a></div>`;
+          grid.appendChild(card);
+        });
+      }catch(e){ console.error(e); }
+    }
+    load(); setInterval(load,3000);
+  })();
+  </script>
+
+</body>
+</html>

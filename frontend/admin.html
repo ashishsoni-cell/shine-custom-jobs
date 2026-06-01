@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin — CLP Engine</title>
+<style>
+  :root{--bg:#0D0D0D;--surface:#111111;--border:#2A2A2A;--green:#22C55E;--yellow:#EAB308;--text:#F9FAFB;--muted:#9CA3AF}
+  body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;margin:0}
+  .wrap{max-width:980px;margin:24px auto;padding:16px}
+  .header{display:flex;align-items:center;justify-content:space-between}
+  .logo{font-weight:800;color:var(--green)}
+  .back a{color:var(--muted);text-decoration:none}
+  .card{background:var(--surface);padding:16px;border-radius:12px;border:1px solid var(--border);margin-top:16px}
+  .form-row{display:flex;gap:8px;margin-bottom:8px}
+  input[type=text]{flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);background:#0b0b0b;color:var(--text)}
+  button{background:var(--green);border:none;padding:10px 12px;border-radius:8px;color:#000;font-weight:700;cursor:pointer}
+  table{width:100%;border-collapse:collapse;margin-top:12px}
+  th,td{padding:8px;border-bottom:1px solid var(--border);text-align:left;color:var(--muted)}
+  .btn{padding:6px 8px;border-radius:8px;border:none;cursor:pointer}
+  .view{background:var(--green);color:#000}
+  .refresh{background:var(--yellow);color:#000}
+  .del{background:#ef4444;color:#fff}
+  .slug-preview{color:var(--muted);font-size:.9rem}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="logo">Admin — CLP Engine</div>
+      <div class="back"><a href="/">← All Cohorts</a></div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700;margin-bottom:8px">Create Cohort</div>
+      <div class="form-row">
+        <input id="name" placeholder="Cohort Name (e.g. Work From Home Jobs)">
+        <input id="keyword" placeholder="Search keyword (e.g. work from home jobs India)">
+        <button id="create">Create + Fetch →</button>
+      </div>
+      <div class="slug-preview">Preview URL: <span id="preview">/jobs/</span></div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700">Existing Cohorts</div>
+      <div id="cohortsWrap">Loading…</div>
+    </div>
+  </div>
+
+<script>
+(async function(){
+  const nameEl = document.getElementById('name');
+  const keywordEl = document.getElementById('keyword');
+  const preview = document.getElementById('preview');
+  function slugify(text){return (text||'').toLowerCase().replace(/[^a-z0-9\s-]/g,'').trim().replace(/\s+/g,'-').replace(/-+/g,'-');}
+  nameEl.addEventListener('input', ()=>{ preview.textContent = '/jobs/' + slugify(nameEl.value); });
+
+  document.getElementById('create').addEventListener('click', async ()=>{
+    const name = nameEl.value.trim(); const keyword = keywordEl.value.trim();
+    if(!name||!keyword) return alert('Enter name and keyword');
+    const res = await fetch('/api/cohorts/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,keyword})});
+    const data = await res.json();
+    if(res.ok){ alert('Created: '+data.url); setTimeout(()=>location.href=data.url,1200); } else { alert('Error: '+(data.error||JSON.stringify(data))); }
+  });
+
+  async function loadCohorts(){
+    const el = document.getElementById('cohortsWrap');
+    const r = await fetch('/api/cohorts');
+    const d = await r.json();
+    const cohorts = d.cohorts || {};
+    if(Object.keys(cohorts).length===0){ el.innerHTML = '<div style="padding:12px;color:var(--muted)">No cohorts yet.</div>'; return; }
+    let html = '<table><thead><tr><th>Name</th><th>Keyword</th><th>Status</th><th>Jobs</th><th>Actions</th></tr></thead><tbody>';
+    Object.keys(cohorts).forEach(slug=>{
+      const c = cohorts[slug];
+      html += `<tr><td>${c.name}</td><td style="color:var(--muted)">${c.keyword}</td><td><span style="color:${c.status==='done'? '#22C55E': c.status==='fetching'? '#EAB308':'#9CA3AF'}">${c.status}</span></td><td>${c.count||0}</td><td>`+
+              `<button class="btn view" data-slug="${slug}">View</button> `+
+              `<button class="btn refresh" data-slug="${slug}">Refresh</button> `+
+              `<button class="btn del" data-slug="${slug}">Delete</button>`+
+              `</td></tr>`;
+    });
+    html += '</tbody></table>';
+    el.innerHTML = html;
+    document.querySelectorAll('.view').forEach(b=>b.addEventListener('click', ()=>{ location.href = '/jobs/'+b.dataset.slug; }));
+    document.querySelectorAll('.refresh').forEach(b=>b.addEventListener('click', async ()=>{
+      const slug = b.dataset.slug; await fetch('/api/cohorts/refresh',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({slug})}); loadCohorts();
+    }));
+    document.querySelectorAll('.del').forEach(b=>b.addEventListener('click', async ()=>{
+      if(!confirm('Delete cohort '+b.dataset.slug+'?')) return; const slug=b.dataset.slug; const r=await fetch('/api/cohorts/'+slug,{method:'DELETE'}); const d=await r.json(); if(r.ok){ loadCohorts(); } else alert('Error: '+(d.error||'unknown'));
+    }));
+  }
+
+  loadCohorts();
+  setInterval(loadCohorts,3000);
+})();
+</script>
+</body>
+</html>

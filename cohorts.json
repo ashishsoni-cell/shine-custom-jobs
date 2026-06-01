@@ -1,0 +1,18 @@
+{
+	"work-from-home-jobs": {
+		"name": "Work From Home Jobs",
+		"keyword": "work from home jobs India",
+		"slug": "work-from-home-jobs",
+		"created": "2026-06-01T00:00:00Z",
+		"status": "idle",
+		"count": 0
+	},
+	"ai-ml-jobs": {
+		"name": "AI ML Jobs",
+		"keyword": "AI ML engineer jobs India",
+		"slug": "ai-ml-jobs",
+		"created": "2026-06-01T00:00:00Z",
+		"status": "idle",
+		"count": 0
+	}
+}
