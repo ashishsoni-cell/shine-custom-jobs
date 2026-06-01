@@ -32,7 +32,7 @@ QUERY_TEMPLATES = ["{kw}", "{kw} hiring", "{kw} openings"]
 # In-memory status tracking
 cohort_status = {}
 cohorts_lock = threading.Lock()
-FETCH_PAUSED = False
+FETCH_PAUSED = True
 
 # Ensure cache dir exists
 os.makedirs(CACHE_DIR, exist_ok=True)
@@ -144,6 +144,8 @@ def fetch_jobs_for_cohort(slug, keyword, limit=JOBS_PER_COHORT):
     try:
         while len(jobs) < limit:
             if FETCH_PAUSED:
+                with cohorts_lock:
+                    cohort_status[slug] = {'status': 'paused', 'count': len(jobs)}
                 time.sleep(5)
                 continue
             qtmpl = QUERY_TEMPLATES[qi % len(QUERY_TEMPLATES)]
@@ -362,10 +364,32 @@ class CLPHandler(BaseHTTPRequestHandler):
     def api_fetch_status(self):
         return self.send_json(200, {'paused': FETCH_PAUSED})
 
+    def api_serp_test(self):
+        if not SERP_AVAILABLE:
+            return self.send_json(400, {'error': 'serpapi not installed'})
+        if not SERP_API_KEY or SERP_API_KEY == 'YOUR_SERPAPI_KEY':
+            return self.send_json(400, {'error': 'Missing SERP_API_KEY'})
+        params = {
+            'q': 'test',
+            'engine': 'google_jobs',
+            'location': 'India',
+            'num': 1,
+            'api_key': SERP_API_KEY,
+            'gl': 'in'
+        }
+        try:
+            search = GoogleSearch(params)
+            results = search.get_dict()
+            return self.send_json(200, {'status': 'ok', 'results': results})
+        except Exception as e:
+            return self.send_json(500, {'error': str(e)})
+
     # --- API handlers ---
     def handle_api_get(self, path, qs):
         if path == '/api/cohorts':
             return self.api_cohorts()
+        if path == '/api/serp/test':
+            return self.api_serp_test()
         if path == '/api/fetch/status':
             return self.api_fetch_status()
         if path == '/api/status':
@@ -502,7 +526,6 @@ if __name__ == '__main__':
         '╚══════════════════════════════════════════════╝',
     ])
     print(banner)
-    auto_start_missing_fetches()
     server = ThreadingHTTPServer(('0.0.0.0', PORT), CLPHandler)
     try:
         server.serve_forever()
