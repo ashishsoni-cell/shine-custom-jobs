@@ -20,14 +20,25 @@
   .view{background:var(--green);color:#000}
   .refresh{background:var(--yellow);color:#000}
   .del{background:#ef4444;color:#fff}
+  .pause{background:#ef4444;color:#fff}
+  .resume{background:#22C55E;color:#000}
   .slug-preview{color:var(--muted);font-size:.9rem}
+  .controls{display:flex;align-items:center;gap:8px}
+  .status-badge{color:var(--text);font-size:.95rem;margin-left:12px}
 </style>
 </head>
 <body>
   <div class="wrap">
     <div class="header">
-      <div class="logo">Admin — CLP Engine</div>
-      <div class="back"><a href="/">← All Cohorts</a></div>
+      <div>
+        <div class="logo">Admin — CLP Engine</div>
+        <div id="fetchStatus" class="status-badge">Fetching: Active</div>
+      </div>
+      <div class="controls">
+        <button id="pauseFetch" class="btn pause">⏸ Pause Fetching</button>
+        <button id="resumeFetch" class="btn resume">▶ Resume Fetching</button>
+        <div class="back"><a href="/">← All Cohorts</a></div>
+      </div>
     </div>
 
     <div class="card">
@@ -62,6 +73,32 @@
     if(res.ok){ alert('Created: '+data.url); setTimeout(()=>location.href=data.url,1200); } else { alert('Error: '+(data.error||JSON.stringify(data))); }
   });
 
+  const pauseButton = document.getElementById('pauseFetch');
+  const resumeButton = document.getElementById('resumeFetch');
+  const fetchStatusEl = document.getElementById('fetchStatus');
+
+  async function updateFetchStatus(){
+    try{
+      const res = await fetch('/api/fetch/status');
+      const data = await res.json();
+      if(res.ok && data.fetching){
+        fetchStatusEl.textContent = 'Fetching: ' + (data.fetching === 'paused' ? 'Paused' : 'Active');
+      }
+    }catch(e){ console.error(e); }
+  }
+
+  pauseButton.addEventListener('click', async ()=>{
+    const res = await fetch('/api/fetch/pause',{method:'POST'});
+    const data = await res.json();
+    if(res.ok && data.fetching){ fetchStatusEl.textContent = 'Fetching: Paused'; }
+  });
+
+  resumeButton.addEventListener('click', async ()=>{
+    const res = await fetch('/api/fetch/resume',{method:'POST'});
+    const data = await res.json();
+    if(res.ok && data.fetching){ fetchStatusEl.textContent = 'Fetching: Active'; }
+  });
+
   async function loadCohorts(){
     const el = document.getElementById('cohortsWrap');
     const r = await fetch('/api/cohorts');
@@ -88,6 +125,7 @@
     }));
   }
 
+  await updateFetchStatus();
   loadCohorts();
   setInterval(loadCohorts,3000);
 })();

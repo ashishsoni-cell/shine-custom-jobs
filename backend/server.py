@@ -32,6 +32,7 @@ QUERY_TEMPLATES = ["{kw}", "{kw} hiring", "{kw} openings"]
 # In-memory status tracking
 cohort_status = {}
 cohorts_lock = threading.Lock()
+FETCH_PAUSED = False
 
 # Ensure cache dir exists
 os.makedirs(CACHE_DIR, exist_ok=True)
@@ -139,6 +140,9 @@ def fetch_jobs_for_cohort(slug, keyword, limit=JOBS_PER_COHORT):
     
     try:
         while len(jobs) < limit:
+            if FETCH_PAUSED:
+                time.sleep(5)
+                continue
             qtmpl = QUERY_TEMPLATES[qi % len(QUERY_TEMPLATES)]
             city = CITIES[ci % len(CITIES)]
             query = qtmpl.format(kw=keyword)
@@ -251,6 +255,10 @@ class CLPHandler(BaseHTTPRequestHandler):
             return self.handle_create_cohort(data)
         if path == '/api/cohorts/refresh':
             return self.handle_refresh_cohort(data)
+        if path == '/api/fetch/pause':
+            return self.handle_fetch_pause()
+        if path == '/api/fetch/resume':
+            return self.handle_fetch_resume()
         return self.send_json(404, {'error': 'Not found'})
 
     def do_DELETE(self):
@@ -337,10 +345,25 @@ class CLPHandler(BaseHTTPRequestHandler):
         except Exception:
             self.send_response(500)
 
+    def handle_fetch_pause(self):
+        global FETCH_PAUSED
+        FETCH_PAUSED = True
+        return self.send_json(200, {'fetching': 'paused'})
+
+    def handle_fetch_resume(self):
+        global FETCH_PAUSED
+        FETCH_PAUSED = False
+        return self.send_json(200, {'fetching': 'active'})
+
+    def api_fetch_status(self):
+        return self.send_json(200, {'fetching': 'paused' if FETCH_PAUSED else 'active'})
+
     # --- API handlers ---
     def handle_api_get(self, path, qs):
         if path == '/api/cohorts':
             return self.api_cohorts()
+        if path == '/api/fetch/status':
+            return self.api_fetch_status()
         if path == '/api/status':
             slug = qs.get('cohort', [None])[0]
             return self.api_status(slug)
