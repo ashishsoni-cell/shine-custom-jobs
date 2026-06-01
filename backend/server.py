@@ -31,8 +31,9 @@ QUERY_TEMPLATES = ["{kw}", "{kw} hiring", "{kw} openings"]
 
 # In-memory status tracking
 cohort_status = {}
+cohort_stop_flags = {}
 cohorts_lock = threading.Lock()
-FETCH_PAUSED = True
+FETCH_PAUSED = False
 
 # Ensure cache dir exists
 os.makedirs(CACHE_DIR, exist_ok=True)
@@ -143,6 +144,11 @@ def fetch_jobs_for_cohort(slug, keyword, limit=JOBS_PER_COHORT):
     
     try:
         while len(jobs) < limit:
+            if cohort_stop_flags.get(slug):
+                with cohorts_lock:
+                    cohort_status[slug] = {'status': 'stopped', 'count': len(jobs)}
+                print(f"[FETCH STOPPED] slug={slug} count={len(jobs)}", flush=True)
+                break
             if FETCH_PAUSED:
                 with cohorts_lock:
                     cohort_status[slug] = {'status': 'paused', 'count': len(jobs)}
@@ -200,9 +206,13 @@ def fetch_jobs_for_cohort(slug, keyword, limit=JOBS_PER_COHORT):
             qi += 1
             ci += 1
             time.sleep(0.5)
-        write_cache(slug, keyword, jobs)
+        if jobs:
+            write_cache(slug, keyword, jobs)
         with cohorts_lock:
-            cohort_status[slug]['status'] = 'done'
+            if cohort_stop_flags.get(slug):
+                cohort_status[slug] = {'status': 'stopped', 'count': len(jobs)}
+            else:
+                cohort_status[slug] = {'status': 'done', 'count': len(jobs)}
     except Exception as e:
         with cohorts_lock:
             cohort_status[slug] = {'status': 'error', 'count': len(jobs), 'error': str(e)}
@@ -261,6 +271,8 @@ class CLPHandler(BaseHTTPRequestHandler):
             return self.handle_create_cohort(data)
         if path == '/api/cohorts/refresh':
             return self.handle_refresh_cohort(data)
+        if path == '/api/cohorts/stop':
+            return self.handle_stop_cohort(data)
         if path == '/api/fetch/pause':
             return self.handle_fetch_pause()
         if path == '/api/fetch/resume':
@@ -441,8 +453,8 @@ class CLPHandler(BaseHTTPRequestHandler):
                 fresh = False
         else:
             fresh = False
-        # If not fresh and not already fetching, start a fetch
-        if not fresh and cohort_status.get(slug, {}).get('status') != 'fetching':
+        # If not fresh and not already fetching, start a fetch unless it was explicitly stopped
+        if not fresh and cohort_status.get(slug, {}).get('status') != 'fetching' and not cohort_stop_flags.get(slug):
             start_fetch_thread(slug, COHORTS[slug]['keyword'])
         # Return cache if exists otherwise empty + status
         resp = cache if cache else {'slug': slug, 'keyword': COHORTS[slug]['keyword'], 'jobs': [], 'fetched_at': None, 'count': 0}
@@ -464,6 +476,7 @@ class CLPHandler(BaseHTTPRequestHandler):
         # persist
         with open(COHORTS_FILE, 'w') as f:
             json.dump(COHORTS, f)
+        cohort_stop_flags[slug] = False
         # start background fetch
         with cohorts_lock:
             cohort_status[slug] = {'status': 'fetching', 'count': 0}
@@ -475,10 +488,21 @@ class CLPHandler(BaseHTTPRequestHandler):
         slug = data.get('slug')
         if not slug or slug not in COHORTS:
             return self.send_json(400, {'error': 'Missing or unknown slug'})
+        cohort_stop_flags[slug] = False
         with cohorts_lock:
             cohort_status[slug] = {'status': 'fetching', 'count': 0}
         start_fetch_thread(slug, COHORTS[slug]['keyword'])
-        return self.send_json(200, {'slug': slug, 'message': 'Refresh triggered'})
+        return self.send_json(200, {'slug': slug, 'message': f'Fetch started for {slug}'})
+
+    def handle_stop_cohort(self, data):
+        slug = data.get('slug')
+        if not slug or slug not in COHORTS:
+            return self.send_json(400, {'error': 'Missing or unknown slug'})
+        cohort_stop_flags[slug] = True
+        with cohorts_lock:
+            current_count = cohort_status.get(slug, {}).get('count', 0)
+            cohort_status[slug] = {'status': 'stopped', 'count': current_count}
+        return self.send_json(200, {'slug': slug, 'message': 'Stop requested'})
 
     def handle_delete_cohort(self, slug):
         if not slug or slug not in COHORTS:
@@ -492,6 +516,7 @@ class CLPHandler(BaseHTTPRequestHandler):
                 os.remove(cp)
             with cohorts_lock:
                 cohort_status.pop(slug, None)
+            cohort_stop_flags.pop(slug, None)
             return self.send_json(200, {'deleted': slug, 'status': 'ok'})
         except Exception as e:
             return self.send_json(500, {'error': str(e)})
@@ -511,6 +536,7 @@ class CLPHandler(BaseHTTPRequestHandler):
 def auto_start_missing_fetches():
     for slug, meta in COHORTS.items():
         if not read_cache(slug):
+            cohort_stop_flags[slug] = False
             with cohorts_lock:
                 cohort_status[slug] = {'status': 'fetching', 'count': 0}
             start_fetch_thread(slug, meta['keyword'])
