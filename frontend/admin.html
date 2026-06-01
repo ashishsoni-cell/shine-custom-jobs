@@ -89,11 +89,8 @@
         body: JSON.stringify({slug})
       });
       const data = await res.json();
-      updateStatusForSlug(slug, 'fetching');
-    }catch(e){
-      btn.disabled = false;
-      btn.textContent = '▶ Fetch';
-    }
+    }catch(e){}
+    setTimeout(loadCohorts, 2000);
   }
 
   async function stopCohort(slug) {
@@ -108,10 +105,8 @@
         body: JSON.stringify({slug})
       });
       const data = await res.json();
-    }catch(e){
-      btn.disabled = false;
-      btn.textContent = '⏹ Stop';
-    }
+    }catch(e){}
+    setTimeout(loadCohorts, 2000);
   }
 
   async function deleteCohort(slug) {
@@ -181,14 +176,18 @@
             if(oldBtn){
               const isOldFetch = oldBtn.classList.contains('fetch');
               const shouldBeFetch = c.status !== 'fetching';
-              if(isOldFetch !== shouldBeFetch && !oldBtn.disabled){
+              if(isOldFetch !== shouldBeFetch){
                 oldBtn.remove();
                 const newBtn = document.createElement('button');
                 newBtn.className = 'btn ' + (shouldBeFetch ? 'fetch' : 'stop');
                 newBtn.dataset.slug = slug;
                 newBtn.textContent = shouldBeFetch ? '▶ Fetch' : '⏹ Stop';
+                newBtn.disabled = false;
                 actionCell.insertBefore(newBtn, actionCell.querySelector('.del'));
                 newBtn.addEventListener('click', ()=> shouldBeFetch ? fetchCohort(slug) : stopCohort(slug));
+              }else{
+                oldBtn.disabled = false;
+                oldBtn.textContent = isOldFetch ? '▶ Fetch' : '⏹ Stop';
               }
             }
           }
