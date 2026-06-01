@@ -81,22 +81,20 @@
     try{
       const res = await fetch('/api/fetch/status');
       const data = await res.json();
-      if(res.ok && data.fetching){
-        fetchStatusEl.textContent = 'Fetching: ' + (data.fetching === 'paused' ? 'Paused' : 'Active');
+      if(res.ok && typeof data.paused === 'boolean'){
+        fetchStatusEl.textContent = 'Fetching: ' + (data.paused ? 'Paused' : 'Active');
       }
     }catch(e){ console.error(e); }
   }
 
   pauseButton.addEventListener('click', async ()=>{
     const res = await fetch('/api/fetch/pause',{method:'POST'});
-    const data = await res.json();
-    if(res.ok && data.fetching){ fetchStatusEl.textContent = 'Fetching: Paused'; }
+    if(res.ok){ await updateFetchStatus(); }
   });
 
   resumeButton.addEventListener('click', async ()=>{
     const res = await fetch('/api/fetch/resume',{method:'POST'});
-    const data = await res.json();
-    if(res.ok && data.fetching){ fetchStatusEl.textContent = 'Fetching: Active'; }
+    if(res.ok){ await updateFetchStatus(); }
   });
 
   async function loadCohorts(){

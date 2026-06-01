@@ -356,7 +356,7 @@ class CLPHandler(BaseHTTPRequestHandler):
         return self.send_json(200, {'fetching': 'active'})
 
     def api_fetch_status(self):
-        return self.send_json(200, {'fetching': 'paused' if FETCH_PAUSED else 'active'})
+        return self.send_json(200, {'paused': FETCH_PAUSED})
 
     # --- API handlers ---
     def handle_api_get(self, path, qs):
